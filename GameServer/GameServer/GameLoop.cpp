@@ -7,11 +7,15 @@
 
 #include "GameLoop.hpp"
 #include <iostream>
+#include <thread>
 using namespace std;
+
+#include "NetworkMgr.hpp"
 
 bool GameLoop::Init()
 {
-    return true;
+    bool ret = NetworkMgr::getInstance()->InitNetwork();
+    return ret;
 }
 
 bool GameLoop::run()
@@ -27,6 +31,11 @@ bool GameLoop::run()
     }
     
     cout<<"Run ... "<<endl;
+    
+    while(true)
+    {
+        std::this_thread::sleep_for( 20ms );
+    }
     
     //
     return true;
