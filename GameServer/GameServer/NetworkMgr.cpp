@@ -8,6 +8,7 @@
 #include "NetworkMgr.hpp"
 #include <thread>
 #include <iostream>
+#include "Buffer.hpp"
 
 NetworkMgr* NetworkMgr::m_pMgr = nullptr;
 
@@ -48,36 +49,76 @@ void NetworkMgr::networkThread()
     }
     
 }
-
 constexpr int RECV_BUFF = 1500;
+void NetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock, const Msg& msg )
+{
+    Buffer sendBuff;
+    std::cout<<"onReceiveMsg:"<< msg.m_strAction.length() <<":"<<msg.m_strAction<<std::endl;
+    short sendLen = msg.m_strAction.length() + 1;
+    
+    short len = htons( sendLen );
+    sendBuff.addData( (char*)&len, sizeof(short) );
+    sendBuff.addData( (char*)msg.m_strAction.c_str(), sendLen );
+    //echo back
+    
+    char buff[RECV_BUFF]{};
+    sendLen = sendBuff.getData( buff ,  RECV_BUFF);
+    short sendedLen = 0;
+    
+    std::cout<<"Echo back:"<< sendLen<<std::endl;
+    
+    while( sendedLen != sendLen )
+    {
+        int ret = sock->SendData( buff + sendedLen,  sendLen - sendedLen  );
+        if( ret < 0 )
+        {
+            break;
+        }
+        else{
+            sendedLen += ret;
+        }
+    }
+}
+
+#include <chrono>
+using namespace std::chrono_literals;
+
 void NetworkMgr::playerThread( std::shared_ptr<TcpSocket> sock )
 {
+    Buffer recvBuff;
     while( true )
     {
-        char recvBuff[RECV_BUFF]{};
-        int ret = sock->RecvData( recvBuff, RECV_BUFF );
+        std::this_thread::sleep_for( 20ms );
+        char buff[RECV_BUFF]{};
+        int ret = sock->RecvData( buff, RECV_BUFF );
         if( ret == 0 )
         {
             break;
         }
-        
-        std::string msg( recvBuff );
-        std::cout<<"receive Msg :"<<msg<<std::endl;
-        
-        int sendLen = msg.length() + 1;
-        int sendedLen = 0;
-        
-        while( sendedLen != sendLen )
+        else if( ret > 0 )
         {
-            ret = sock->SendData( msg.c_str(),  sendLen  );
-            if( ret < 0 )
-            {
-                break;
-            }
-            else{
-                sendedLen += ret;
-            }
-            
+            recvBuff.addData( buff, ret );
         }
+        
+        //TCP拆包
+        if( recvBuff.getSize() > sizeof( short ) )
+        {
+            char msgbuff[RECV_BUFF]{};
+            short len = 0;
+            recvBuff.getData( (char*)&len, sizeof(short));
+            len = ntohs( len );
+            if( recvBuff.getSize() >= len + sizeof(short) )
+            {
+                recvBuff.consumeData( sizeof( short ) );
+                recvBuff.getData( msgbuff,  RECV_BUFF );
+                recvBuff.consumeData( len );
+                
+                std::string msg( msgbuff );
+                
+                
+                onReceiveMsg( sock, Msg(msg) );
+            }
+        }
+        
     }
 }

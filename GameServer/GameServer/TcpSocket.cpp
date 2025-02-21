@@ -11,6 +11,8 @@
 #include <sys/socket.h> // socket(), bind(), listen(), accept()
 #include <arpa/inet.h> // sockaddr_in, inet_addr()
 
+#include <fcntl.h> //O_NONBLOCK, fcntl
+
 #include <iostream>
 #include <string>
 
@@ -118,4 +120,14 @@ int TcpSocket::RecvData( char* buff, int maxLen )
         perror("RecvData Error");
     }
     return ret;
+}
+
+int TcpSocket::setNonBlock( bool bNonBlock )
+{
+    int flags = fcntl( m_sock, F_GETFL, 0 );
+    flags = bNonBlock ?( flags | O_NONBLOCK ):( flags & ~O_NONBLOCK );
+    int ret = fcntl( m_sock, F_SETFL, flags );
+    
+    return ret;
+    
 }

@@ -31,6 +31,8 @@ public:
     
     int RecvData( char* buff, int maxLen );
     
+    int setNonBlock( bool bNonBlock );
+    
 };
 
 class NetUtil
