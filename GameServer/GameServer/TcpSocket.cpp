@@ -17,7 +17,7 @@
 #include <string>
 
 
-std::shared_ptr<TcpSocket> NetUtil::createTcpSocket()
+TcpSocketPtr NetUtil::createTcpSocket()
 {
     int sock = socket( AF_INET, SOCK_STREAM, 0);
     if( sock < 0 )
@@ -27,6 +27,54 @@ std::shared_ptr<TcpSocket> NetUtil::createTcpSocket()
     }
     
     return std::make_shared<TcpSocket>(sock);
+}
+
+fd_set*  NetUtil::FillSetFromVector( fd_set& out_set, const std::vector< TcpSocketPtr > & insocks)
+{
+    FD_ZERO(&out_set);
+    for( auto it : insocks )
+    {
+        FD_SET( it->m_sock, &out_set);
+    }
+    
+    return &out_set;
+    
+}
+std::vector<TcpSocketPtr>  NetUtil::FillVectorFromSet( const std::vector<TcpSocketPtr>& insocks ,const fd_set& inSet )
+{
+    std::vector<TcpSocketPtr> outSocks;
+    for( auto it : insocks )
+    {
+        if( FD_ISSET( it->m_sock, &inSet) )
+        {
+            outSocks.push_back( it );
+        }
+    }
+    
+    return outSocks;
+}
+
+int NetUtil::Select( int maxFd, const std::vector<TcpSocketPtr>& inReadSet, std::vector<TcpSocketPtr>& outReadSet,
+           const std::vector<TcpSocketPtr>& inWriteSet, std::vector<TcpSocketPtr>& outWriteSet,
+           const std::vector<TcpSocketPtr>& inExceptSet, std::vector<TcpSocketPtr>& outExceptSet)
+{
+    fd_set read, write, except;
+    
+    fd_set* readPtr = FillSetFromVector( read, inReadSet );
+    fd_set* writePtr = FillSetFromVector( write, inReadSet );
+    fd_set* exceptPtr = FillSetFromVector( except, inReadSet );
+    
+    int ret = select(maxFd + 1 , readPtr, writePtr, exceptPtr, nullptr );
+    
+    if( ret > 0  )
+    {
+        outReadSet = FillVectorFromSet( inReadSet, *readPtr);
+        outWriteSet = FillVectorFromSet( inWriteSet, *writePtr);
+        outExceptSet = FillVectorFromSet( inExceptSet, *exceptPtr);
+    }
+    
+    return ret;
+    
 }
 
 

@@ -10,12 +10,15 @@
 
 #include <stdio.h>
 #include <memory>
+#include <set>
+#include <vector>
+
 
 constexpr int BACKLOG_D = 500;
 
 class TcpSocket
 {
-private:
+public:
     int m_sock;
 public:
     TcpSocket( int sock );
@@ -35,10 +38,19 @@ public:
     
 };
 
+typedef std::shared_ptr<TcpSocket> TcpSocketPtr;
+
 class NetUtil
 {
 public:
-    static std::shared_ptr<TcpSocket> createTcpSocket();
+    static TcpSocketPtr createTcpSocket();
+    
+    static fd_set*  FillSetFromVector( fd_set& out_set, const std::vector< TcpSocketPtr > & insocks);
+    static std::vector<TcpSocketPtr> FillVectorFromSet( const std::vector<TcpSocketPtr>& insocks , const fd_set& inSet);
+    
+    static int Select(  int maxFd, const std::vector<TcpSocketPtr>& inReadSet, std::vector<TcpSocketPtr>& outReadSet,
+               const std::vector<TcpSocketPtr>& inWriteSet, std::vector<TcpSocketPtr>& outWriteSet,
+               const std::vector<TcpSocketPtr>& inExceptSet, std::vector<TcpSocketPtr>& outExceptSet);
     
 };
 
