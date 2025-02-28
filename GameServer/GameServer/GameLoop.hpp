@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include "NetworkMgr.hpp"
+#include "Player/PlayerMgr.hpp"
 
 class GameLoop
 {
@@ -26,6 +27,7 @@ public:
     
 private:
     int m_nextRoleID = 1;
+    PlayerManager m_playerMgr;
 };
 
 #endif /* GameLoop_hpp */

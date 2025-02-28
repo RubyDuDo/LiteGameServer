@@ -83,16 +83,7 @@ void GameLoop::dealLogin( int sockID, const Msg& msg )
     cout<<"Login From:"<< login.strname()<<" _ "<<login.strpass()<<endl;
     cout<<" Get RoleID:"<<m_nextRoleID<<endl;
     
-    ResponseLogin rsp;
-    rsp.set_roleid( m_nextRoleID );
-    m_nextRoleID++;
-    
-    Msg outMsg;
-    outMsg.set_allocated_head( ProtobufHelp::CreatePacketHead( MsgType_Login));
-    outMsg.mutable_payload()->PackFrom( rsp );
-    
-    NetworkMgr::getInstance()->addTcpQueue( sockID, outMsg);
-    
+    m_playerMgr.onPlayerLogin( sockID, login.strname(), login.strpass() );
     
 }
 
@@ -105,6 +96,13 @@ void GameLoop::dealAction( int sockID, const Msg& msg )
         return;
     }
     cout<<"Receive Act "<< act.action()<<endl;
+    
+    if( !m_playerMgr.isPlayerOnline( m_playerMgr.getPlayerIDFromSock( sockID ) ))
+    {
+        cout<<"This player is not online"<<endl;
+        return;
+    }
+    
     
     ResponseAct rsp;
     rsp.set_action( act.action() );
@@ -127,12 +125,5 @@ void GameLoop::dealLogout( int sockID, const Msg& msg )
     }
     cout<<"Receive Logout "<< logout.roleid()<<"_ sock:"<<sockID <<endl;
     
-    ResponseLogout rsp;
-    rsp.set_roleid( logout.roleid() );
-    
-    Msg outMsg;
-    outMsg.set_allocated_head( ProtobufHelp::CreatePacketHead( MsgType_Logout));
-    outMsg.mutable_payload()->PackFrom( rsp );
-    
-    NetworkMgr::getInstance()->addTcpQueue( sockID, outMsg);
+    m_playerMgr.onPlayerLogout( sockID, logout.roleid() );
 }
