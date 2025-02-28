@@ -12,16 +12,18 @@
 #include <string>
 #include "TcpSocket.hpp"
 #include <map>
+#include "proto/msg.pb.h"
+using namespace MyGame;
 
 constexpr short SVR_PORT = 8081;
 #include "Buffer.hpp"
 
-class Msg
+class GameLoop;
+
+class ProtobufHelp
 {
 public:
-    Msg( const std::string& str ):m_strAction( str ){};
-    std::string m_strAction;
-    
+    static MsgHead* CreatePacketHead( MsgType type );
 };
 
 #include <set>
@@ -49,6 +51,8 @@ private:
     std::map<int, Slot> m_mapSlot;
     
     int m_maxFd = 0 ;
+    
+    std::function<void(int, const Msg&)> m_recvFun;
 public:
     static NetworkMgr* getInstance();
     
@@ -59,8 +63,14 @@ public:
     
     void playerThread( std::shared_ptr<TcpSocket> );
     
-    void onReceiveMsg( std::shared_ptr<TcpSocket> sock, const Msg& msg );
+    void onReceiveMsg( std::shared_ptr<TcpSocket> sock, const Msg& packet );
+    
+    void registerReceiveMsgHandle( std::function<void( int, const Msg&)> recvFun);
+    
+    void addTcpQueue( int sockID,  const Msg& packet );
 
+    void clearInvalidSock();
+    
 };
 
 #endif /* NetworkMgr_hpp */

@@ -20,6 +20,7 @@ class TcpSocket
 {
 public:
     int m_sock;
+    bool m_bValid = true;;
 public:
     TcpSocket( int sock );
     ~TcpSocket();
@@ -35,6 +36,9 @@ public:
     int RecvData( char* buff, int maxLen );
     
     int setNonBlock( bool bNonBlock );
+    
+    void setValid( bool bValid );
+    bool isValid( );
     
 };
 

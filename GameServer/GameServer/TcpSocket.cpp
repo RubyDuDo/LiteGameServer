@@ -88,6 +88,16 @@ TcpSocket::~TcpSocket()
     close( m_sock );
 }
 
+void TcpSocket::setValid( bool bValid )
+{
+    m_bValid = bValid;
+}
+
+bool TcpSocket::isValid( )
+{
+    return m_bValid;
+}
+
 int TcpSocket::Bind( short port )
 {
     struct sockaddr_in addr{};

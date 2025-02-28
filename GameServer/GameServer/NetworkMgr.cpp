@@ -18,13 +18,25 @@ constexpr int RECV_BUFF = 1500;
 
 NetworkMgr* NetworkMgr::m_pMgr = nullptr;
 
+MyGame::MsgHead* ProtobufHelp::CreatePacketHead( MsgType type )
+{
+    MsgHead* pHead = new MsgHead();
+    pHead->set_type( type );
+    
+    return pHead;
+}
+
+
 void Slot::sendMsg( const Msg& msg )
 {
-    short sendLen = msg.m_strAction.length() + 1;
+    cout<<"Slot SendMsg:"<<msg.head().type()<<endl;
+    std::string strData = msg.SerializeAsString();
+    
+    short sendLen = strData.length();
     
     short len = htons( sendLen );
     m_sendBuff.addData( (char*)&len, sizeof(short) );
-    m_sendBuff.addData( (char*)msg.m_strAction.c_str(), sendLen );
+    m_sendBuff.addData( (char*)strData.c_str(), sendLen );
 }
 
 std::shared_ptr<Msg> Slot::getNextRecvMsg()
@@ -42,8 +54,16 @@ std::shared_ptr<Msg> Slot::getNextRecvMsg()
             m_recvBuff.getData( msgbuff,  RECV_BUFF );
             m_recvBuff.consumeData( len );
             
-            std::string msg( msgbuff );
+            std::string data( msgbuff, len );
+            Msg msg;
+            if( !msg.ParseFromString( data ))
+            {
+                cout<<"Parse head fail!"<<endl;
+                return nullptr;
+            }
             
+//            cout<<"Parse Msg:" << msg.head().type()<<"_______"<<msg.DebugString()<<endl;
+        
             return std::make_shared<Msg>(msg);
         }
     }
@@ -78,6 +98,27 @@ bool NetworkMgr::InitNetwork()
     return true;
 }
 
+void NetworkMgr::clearInvalidSock()
+{
+    auto it = m_setSocks.begin();
+    if( it != m_setSocks.end() )
+    {
+        auto pSock = *it;
+        if( pSock->isValid() )
+        {
+            it++;
+        }
+        else{
+            it = m_setSocks.erase( it );
+        }
+    }
+}
+
+void NetworkMgr::registerReceiveMsgHandle( std::function<void(int,const Msg&)> recvFun)
+{
+    m_recvFun = recvFun;
+}
+
 void NetworkMgr::networkThread()
 {
     std::cout<<"network Thread started!"<<std::endl;
@@ -98,6 +139,7 @@ void NetworkMgr::networkNonBlockThread()
     while( true )
     {
         std::this_thread::sleep_for( 10ms );
+        clearInvalidSock();
         std::vector<TcpSocketPtr> outReadSet, outWriteSet, outExceptSet;
     
         int ret = NetUtil::Select( m_maxFd, m_setSocks, outReadSet, m_setSocks, outWriteSet, m_setSocks, outExceptSet);
@@ -126,11 +168,18 @@ void NetworkMgr::networkNonBlockThread()
                     }
                 }
                 else{
+                    if( !it->isValid() )
+                    {
+                        continue;
+                    }
+                    
                     //do receive
                     char buff[RECV_BUFF]{};
                     int ret = it->RecvData( buff, RECV_BUFF );
+                    cout<<"receiveData:"<<ret<<": from :"<<it->m_sock<<endl;
                     if( ret == 0 )
                     {
+                        it->setValid( false );
                         break;
                     }
                     else if( ret > 0 )
@@ -141,9 +190,7 @@ void NetworkMgr::networkNonBlockThread()
                         auto pMsg = slot.getNextRecvMsg();
                         if( pMsg )
                         {
-                            std::cout<<"Receive:"<<pMsg->m_strAction<<std::endl;
-                            //echo back
-                            slot.sendMsg( *pMsg );
+                            onReceiveMsg( it, *pMsg );
                         }
                     }
                 }
@@ -174,34 +221,24 @@ void NetworkMgr::networkNonBlockThread()
     }
 }
 
-void NetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock, const Msg& msg )
+void NetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock, const Msg& packet )
 {
-    Buffer sendBuff;
-    std::cout<<"onReceiveMsg:"<< msg.m_strAction.length() <<":"<<msg.m_strAction<<std::endl;
-    short sendLen = msg.m_strAction.length() + 1;
-    
-    short len = htons( sendLen );
-    sendBuff.addData( (char*)&len, sizeof(short) );
-    sendBuff.addData( (char*)msg.m_strAction.c_str(), sendLen );
-    //echo back
-    
-    char buff[RECV_BUFF]{};
-    sendLen = sendBuff.getData( buff ,  RECV_BUFF);
-    short sendedLen = 0;
-    
-    std::cout<<"Echo back:"<< sendLen<<std::endl;
-    
-    while( sendedLen != sendLen )
+    if( m_recvFun )
     {
-        int ret = sock->SendData( buff + sendedLen,  sendLen - sendedLen  );
-        if( ret < 0 )
-        {
-            break;
-        }
-        else{
-            sendedLen += ret;
-        }
+        m_recvFun( sock->m_sock ,packet );
     }
+}
+
+void NetworkMgr::addTcpQueue( int sockID, const Msg& packet )
+{
+    auto it = m_mapSlot.find( sockID);
+    if( it == m_mapSlot.end())
+    {
+        cout<<"addTcpQueue sockID not found:"<<sockID<<endl;
+        return;
+    }
+    
+    it->second.sendMsg( packet );
 }
 
 
@@ -236,12 +273,11 @@ void NetworkMgr::playerThread( std::shared_ptr<TcpSocket> sock )
                 recvBuff.getData( msgbuff,  RECV_BUFF );
                 recvBuff.consumeData( len );
                 
-                std::string msg( msgbuff );
+                std::string msg( msgbuff , len );
                 
                 
-                onReceiveMsg( sock, Msg(msg) );
+//                onReceiveMsg( sock, msg );
             }
         }
-        
     }
 }
