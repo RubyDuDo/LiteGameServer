@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		BEC12EDE2D698EAC00EA4DB2 /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC12EDD2D698EAC00EA4DB2 /* libprotobuf.a */; };
+		BEC12F2A2D72EC8F00EA4DB2 /* libmysqlcppconn-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC12F292D72EC8F00EA4DB2 /* libmysqlcppconn-static.a */; };
+		BEC12F2D2D72F06F00EA4DB2 /* libssl.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC12F2C2D72F06F00EA4DB2 /* libssl.3.dylib */; };
+		BEC12F2F2D72F09C00EA4DB2 /* libcrypto.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC12F2E2D72F09C00EA4DB2 /* libcrypto.3.dylib */; };
+		BEC12F312D72FA4800EA4DB2 /* libresolv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC12F302D72FA4800EA4DB2 /* libresolv.tbd */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,11 +31,28 @@
 		BEC12ED72D69654200EA4DB2 /* libprotobuf.29.3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libprotobuf.29.3.0.dylib; path = ../../../../../../usr/local/Cellar/protobuf/29.3/lib/libprotobuf.29.3.0.dylib; sourceTree = "<group>"; };
 		BEC12EDB2D6982D700EA4DB2 /* libprotobuf-lite.29.3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libprotobuf-lite.29.3.0.dylib"; path = "../../../../../../usr/local/Cellar/protobuf/29.3/lib/libprotobuf-lite.29.3.0.dylib"; sourceTree = "<group>"; };
 		BEC12EDD2D698EAC00EA4DB2 /* libprotobuf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libprotobuf.a; path = ../../../../../../usr/local/lib/libprotobuf.a; sourceTree = "<group>"; };
+		BEC12F292D72EC8F00EA4DB2 /* libmysqlcppconn-static.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libmysqlcppconn-static.a"; path = "../../thirdlibs/mysql-connector-c++/lib64/libmysqlcppconn-static.a"; sourceTree = "<group>"; };
+		BEC12F2C2D72F06F00EA4DB2 /* libssl.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.3.dylib; path = "../../thirdlibs/mysql-connector-c++/lib64/libssl.3.dylib"; sourceTree = "<group>"; };
+		BEC12F2E2D72F09C00EA4DB2 /* libcrypto.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.3.dylib; path = "../../thirdlibs/mysql-connector-c++/lib64/libcrypto.3.dylib"; sourceTree = "<group>"; };
+		BEC12F302D72FA4800EA4DB2 /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BEC12F2B2D72EF0400EA4DB2 /* Exceptions for "GameServer" folder in "GameServer" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				proto/msg.proto,
+			);
+			target = BE04CA012D66F67D00492E0C /* GameServer */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BE04CA042D66F67D00492E0C /* GameServer */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BEC12F2B2D72EF0400EA4DB2 /* Exceptions for "GameServer" folder in "GameServer" target */,
+			);
 			path = GameServer;
 			sourceTree = "<group>";
 		};
@@ -42,6 +63,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BEC12F312D72FA4800EA4DB2 /* libresolv.tbd in Frameworks */,
+				BEC12F2F2D72F09C00EA4DB2 /* libcrypto.3.dylib in Frameworks */,
+				BEC12F2D2D72F06F00EA4DB2 /* libssl.3.dylib in Frameworks */,
+				BEC12F2A2D72EC8F00EA4DB2 /* libmysqlcppconn-static.a in Frameworks */,
 				BEC12EDE2D698EAC00EA4DB2 /* libprotobuf.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -69,6 +94,10 @@
 		BEC12ED62D69654200EA4DB2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				BEC12F302D72FA4800EA4DB2 /* libresolv.tbd */,
+				BEC12F2E2D72F09C00EA4DB2 /* libcrypto.3.dylib */,
+				BEC12F2C2D72F06F00EA4DB2 /* libssl.3.dylib */,
+				BEC12F292D72EC8F00EA4DB2 /* libmysqlcppconn-static.a */,
 				BEC12EDD2D698EAC00EA4DB2 /* libprotobuf.a */,
 				BEC12EDB2D6982D700EA4DB2 /* libprotobuf-lite.29.3.0.dylib */,
 				BEC12ED72D69654200EA4DB2 /* libprotobuf.29.3.0.dylib */,
@@ -197,11 +226,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LD_RUNPATH_SEARCH_PATHS = "/usr/local/mysql-connector-c++/lib64";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-Wl,-rpath,/usr/local/mysql-connector-c++/lib64";
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -252,10 +283,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LD_RUNPATH_SEARCH_PATHS = "/usr/local/mysql-connector-c++/lib64";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = "-Wl,-rpath,/usr/local/mysql-connector-c++/lib64";
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -263,25 +296,43 @@
 		BE04CA0A2D66F67D00492E0C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = GameServer/GameServerDebug.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 9YQ3S558EJ;
-				ENABLE_HARDENED_RUNTIME = YES;
+				DEVELOPMENT_TEAM = XYT4GA7TJA;
+				ENABLE_HARDENED_RUNTIME = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = GOOGLE_PROTOBUF_NO_LOGGING;
-				HEADER_SEARCH_PATHS = /usr/local/include;
-				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include,
+					"/usr/local/mysql-connector-c++/include",
+				);
+				LD_RUNPATH_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					"/usr/local/mysql-connector-c++/lib64",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
 		BE04CA0B2D66F67D00492E0C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 9YQ3S558EJ;
+				DEVELOPMENT_TEAM = XYT4GA7TJA;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = GOOGLE_PROTOBUF_NO_LOGGING;
-				HEADER_SEARCH_PATHS = /usr/local/include;
-				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include,
+					"/usr/local/mysql-connector-c++/include",
+				);
+				LD_RUNPATH_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					"/usr/local/mysql-connector-c++/lib64",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

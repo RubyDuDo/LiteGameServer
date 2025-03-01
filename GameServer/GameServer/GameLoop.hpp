@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "NetworkMgr.hpp"
 #include "Player/PlayerMgr.hpp"
+#include "DB/DBMgr.hpp"
 
 class GameLoop
 {
@@ -28,6 +29,7 @@ public:
 private:
     int m_nextRoleID = 1;
     PlayerManager m_playerMgr;
+    DBMgr m_db;
 };
 
 #endif /* GameLoop_hpp */

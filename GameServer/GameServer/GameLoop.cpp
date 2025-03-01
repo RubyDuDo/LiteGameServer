@@ -25,6 +25,9 @@ bool GameLoop::Init()
                                                                       std::placeholders::_2)
                                                             );
     }
+    
+    m_db.InitDB("tcp://127.0.0.1:3306", "admin", "111111", "MyGame");
+
     return ret;
 }
 
