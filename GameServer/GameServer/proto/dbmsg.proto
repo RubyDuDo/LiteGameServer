@@ -1,0 +1,83 @@
+//
+//  dbmsg.proto
+//  GameServer
+//
+//  Created by pinky on 2025-03-01.
+//
+syntax = "proto3";
+package MyGameDB;
+
+enum DBErrorType
+{
+    DBErr_OK = 0;
+    DBErr_Fail = 1;
+    
+    DBErr_NotExist = 2;
+}
+
+enum DBReqType
+{
+    DBReqType_Default = 0;
+    DBReqType_QueryAccount = 1;
+    DBReqType_ModAccount = 2;
+    DBReqType_QueryRole = 3;
+    DBReqType_AddRole = 4;
+}
+
+message DBReqHead
+{
+    DBReqType type = 1;
+}
+
+message DBRequest
+{
+    DBReqHead head = 1;
+    string payload = 2;
+}
+
+message QRsqHead
+{
+    DBReqType type = 1;
+    DBErrorType res = 2;
+}
+
+message DBResponse
+{
+    QRsqHead head = 1;
+    string payload = 2;
+}
+
+message DBReqQueryAccount
+{
+    string account = 1;
+}
+
+message DBRspAccout
+{
+    string account = 1;
+    string passwd = 2;
+    int32 roleid = 3;
+}
+
+message DBReqModAccount
+{
+    string account = 1;
+    int32 roleid = 2;
+}
+
+message DBReqQueryRole
+{
+    int32 roleid = 1;
+}
+
+message DBReqAddRole
+{
+    string name = 1;
+}
+
+message DBRspRole
+{
+    int32 roleid = 1;
+    string name = 2;
+    int32 level = 3;
+}

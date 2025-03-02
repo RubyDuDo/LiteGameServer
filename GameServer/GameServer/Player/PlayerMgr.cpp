@@ -24,8 +24,24 @@ int PlayerManager::getRoleID( const string& strName ) const
     return roleID;
 }
 
+void PlayerManager::addPlayer( int sockID, const string& strName, int roleid, int level )
+{
+    Player player;
+    player.m_roleID = roleid;
+    player.m_strName = strName;
+    player.m_level = 1;
+    player.m_state = Player_Login;
+    
+    m_mapPlayers[roleid] = player;
+    
+    m_mapRoleToSock[ roleid ] = sockID;
+    m_mapSockToRole[ sockID ] = roleid;
+    
+}
+
 void PlayerManager::onPlayerLogin( int sockID, const string& strName, const string& strPass )
 {
+    
     if( !checkPass( strName,  strPass ))
     {
         cout<<"Password not match"<<endl;
@@ -59,11 +75,7 @@ void PlayerManager::onPlayerLogin( int sockID, const string& strName, const stri
     ResponseLogin rsp;
     rsp.set_roleid( roleID );
     
-    Msg outMsg;
-    outMsg.set_allocated_head( ProtobufHelp::CreatePacketHead( MsgType_Login));
-    outMsg.mutable_payload()->PackFrom( rsp );
-    
-    NetworkMgr::getInstance()->addTcpQueue( sockID, outMsg);
+    NetworkMgr::getInstance()->addTcpQueue( sockID, MsgType_Login, MsgErr_OK, rsp);
 }
 
 void PlayerManager::onPlayerLogout( int sockID, int roleID )
@@ -91,11 +103,7 @@ void PlayerManager::onPlayerLogout( int sockID, int roleID )
     ResponseLogout rsp;
     rsp.set_roleid( roleID );
     
-    Msg outMsg;
-    outMsg.set_allocated_head( ProtobufHelp::CreatePacketHead( MsgType_Logout));
-    outMsg.mutable_payload()->PackFrom( rsp );
-    
-    NetworkMgr::getInstance()->addTcpQueue( sockID, outMsg);
+    NetworkMgr::getInstance()->addTcpQueue( sockID,MsgType_Logout, MsgErr_OK,  rsp);
 }
 
 bool PlayerManager::isPlayerOnline( int roleID )

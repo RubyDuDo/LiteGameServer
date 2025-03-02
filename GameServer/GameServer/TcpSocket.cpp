@@ -100,6 +100,12 @@ bool TcpSocket::isValid( )
 
 int TcpSocket::Bind( short port )
 {
+    //set resueable, which will be more convenient when debug
+    int opt = 1;
+    if (setsockopt(m_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        perror("setsockopt(SO_REUSEADDR) failed");
+    }
+    
     struct sockaddr_in addr{};
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -111,6 +117,8 @@ int TcpSocket::Bind( short port )
         perror("Bind Error");
         return ret;
     }
+    
+
     return 0;
 }
 

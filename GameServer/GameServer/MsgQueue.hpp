@@ -69,7 +69,7 @@ template <typename T>
 shared_ptr<T> MsgQueue<T>::wait_and_pop()
 {
     unique_lock lk(m_mut);
-    m_cond.wait( lk, [this]{ return m_queue.empty();});
+    m_cond.wait( lk, [this]{ return !m_queue.empty();});
     auto res( make_shared<T>( m_queue.front() ));
     m_queue.pop();
     return res;

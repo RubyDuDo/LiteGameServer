@@ -18,6 +18,7 @@ class PlayerManager
 {
 public:
     void onPlayerLogin( int sockID, const string& strName, const string& strPass );
+    void addPlayer( int sockID, const string& strName, int roleid, int level );
     void onPlayerLogout( int sockID,int roleID );
     
     bool isPlayerOnline( int roleID );

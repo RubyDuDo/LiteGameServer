@@ -24,6 +24,7 @@ class ProtobufHelp
 {
 public:
     static MsgHead* CreatePacketHead( MsgType type );
+    static MsgRspHead* CreateRspHead( MsgType type, MsgErrCode res );
 };
 
 #include <set>
@@ -33,7 +34,7 @@ class Slot
 public:
     Slot():m_recvBuff(), m_sendBuff(){};
     
-    void sendMsg( const Msg& msg );
+    void sendMsg( const MsgRsp& msg );
     std::shared_ptr<Msg> getNextRecvMsg();
 public:
     Buffer m_recvBuff;
@@ -67,10 +68,23 @@ public:
     
     void registerReceiveMsgHandle( std::function<void( int, const Msg&)> recvFun);
     
-    void addTcpQueue( int sockID,  const Msg& packet );
+    void addTcpQueue( int sockID,  const MsgRsp& packet );
+    
+    template< typename T>
+    void addTcpQueue( int sockID,  MsgType type, MsgErrCode res,  const T& rsp );
 
     void clearInvalidSock();
     
 };
+
+template< typename T>
+void NetworkMgr::addTcpQueue( int sockID, MsgType type, MsgErrCode res, const T& rsp )
+{
+    MsgRsp outMsg;
+    outMsg.set_allocated_head( ProtobufHelp::CreateRspHead( type, res ));
+    outMsg.mutable_payload()->PackFrom( rsp );
+    
+    addTcpQueue( sockID, outMsg );
+}
 
 #endif /* NetworkMgr_hpp */

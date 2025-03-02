@@ -26,8 +26,18 @@ MyGame::MsgHead* ProtobufHelp::CreatePacketHead( MsgType type )
     return pHead;
 }
 
+MsgRspHead* ProtobufHelp::CreateRspHead( MsgType type, MsgErrCode res )
+{
+    MsgRspHead* pHead = new MsgRspHead();
+    pHead->set_type( type );
+    pHead->set_res( res );
+    
+    return pHead;
+    
+}
 
-void Slot::sendMsg( const Msg& msg )
+
+void Slot::sendMsg( const MsgRsp& msg )
 {
     cout<<"Slot SendMsg:"<<msg.head().type()<<endl;
     std::string strData = msg.SerializeAsString();
@@ -229,7 +239,7 @@ void NetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock, const Msg& packe
     }
 }
 
-void NetworkMgr::addTcpQueue( int sockID, const Msg& packet )
+void NetworkMgr::addTcpQueue( int sockID, const MsgRsp& packet )
 {
     auto it = m_mapSlot.find( sockID);
     if( it == m_mapSlot.end())
@@ -240,6 +250,8 @@ void NetworkMgr::addTcpQueue( int sockID, const Msg& packet )
     
     it->second.sendMsg( packet );
 }
+
+
 
 
 
