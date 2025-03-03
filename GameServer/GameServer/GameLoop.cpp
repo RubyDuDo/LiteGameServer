@@ -14,9 +14,19 @@ using namespace std;
 #include "proto/msg.pb.h"
 using namespace MyGame;
 
+constexpr unsigned short SVR_PORT_DEF = 8081;
+constexpr string DB_HOST_DEF = "tcp://127.0.0.1:3306";
+constexpr string DB_USER_DEF = "admin";
+constexpr string DB_PASSWD_DEF = "111111";
+constexpr string DB_NAME_DEF = "MyGame";
+
+constexpr string config_dir = "./config.ini";
 bool GameLoop::Init()
 {
-    bool ret = NetworkMgr::getInstance()->InitNetwork();
+    int res = m_config.ParseFile( config_dir );
+    
+    unsigned short port = (unsigned short)m_config.getInt( "Network" , "port", SVR_PORT_DEF );
+    bool ret = NetworkMgr::getInstance()->InitNetwork( port );
     if( ret )
     {
         NetworkMgr::getInstance()->registerReceiveMsgHandle(
@@ -26,7 +36,11 @@ bool GameLoop::Init()
                                                             );
     }
     
-    m_db.InitDB("tcp://127.0.0.1:3306", "admin", "111111", "MyGame");
+    string host = m_config.getString("DB", "host", DB_HOST_DEF );
+    string user = m_config.getString("DB", "user", DB_USER_DEF );
+    string passwd = m_config.getString("DB", "passwd", DB_PASSWD_DEF );
+    string dbname = m_config.getString("DB", "dbname", DB_NAME_DEF );
+    m_db.InitDB(host, user, passwd, dbname);
     m_db.registerRspHandle(
                            std::bind( &GameLoop::onReceiveDBRsp, this ,
                                      std::placeholders::_1,

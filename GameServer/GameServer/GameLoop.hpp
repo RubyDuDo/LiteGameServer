@@ -13,6 +13,7 @@
 #include "Player/PlayerMgr.hpp"
 #include "DB/DBMgr.hpp"
 #include "proto/dbmsg.pb.h"
+#include "DataReader/INIReader.hpp"
 
 class GameLoop
 {
@@ -46,6 +47,7 @@ private:
     int m_nextRoleID = 1;
     PlayerManager m_playerMgr;
     DBMgr m_db;
+    INIReader m_config;
     
 
     MsgQueue< pair<int, Msg> > m_recvMsgs;

@@ -25,11 +25,11 @@ public:
     TcpSocket( int sock );
     ~TcpSocket();
     
-    int Bind( short port );
+    int Bind( unsigned short port );
     int Listen( int backlog = BACKLOG_D );
     std::shared_ptr<TcpSocket> Accept();
     
-    int Connect( const std::string& ip, short port );
+    int Connect( const std::string& ip, unsigned short port );
     
     int SendData( const char* buff, int len );
     

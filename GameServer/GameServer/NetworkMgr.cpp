@@ -90,11 +90,11 @@ NetworkMgr* NetworkMgr::getInstance()
     return m_pMgr;
 }
 
-bool NetworkMgr::InitNetwork()
+bool NetworkMgr::InitNetwork( unsigned short svr_port )
 {
     m_listenSock = NetUtil::createTcpSocket();
     
-    m_listenSock->Bind( SVR_PORT );
+    m_listenSock->Bind( svr_port );
     
     m_listenSock->Listen();
     

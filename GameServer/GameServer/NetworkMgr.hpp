@@ -15,7 +15,6 @@
 #include "proto/msg.pb.h"
 using namespace MyGame;
 
-constexpr short SVR_PORT = 8081;
 #include "Buffer.hpp"
 
 class GameLoop;
@@ -57,7 +56,7 @@ private:
 public:
     static NetworkMgr* getInstance();
     
-    bool InitNetwork();
+    bool InitNetwork( unsigned short svr_port );
     
     void networkNonBlockThread();
     void networkThread();

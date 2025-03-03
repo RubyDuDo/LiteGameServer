@@ -98,7 +98,7 @@ bool TcpSocket::isValid( )
     return m_bValid;
 }
 
-int TcpSocket::Bind( short port )
+int TcpSocket::Bind( unsigned short port )
 {
     //set resueable, which will be more convenient when debug
     int opt = 1;
@@ -152,7 +152,7 @@ std::shared_ptr<TcpSocket> TcpSocket::Accept()
     }
 }
 
-int TcpSocket::Connect( const std::string& ip, short port )
+int TcpSocket::Connect( const std::string& ip, unsigned short port )
 {
     struct sockaddr_in addr{};
     addr.sin_family = AF_INET;
