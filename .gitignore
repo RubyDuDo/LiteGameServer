@@ -10,3 +10,4 @@ GameServer/GameServer.xcodeproj/xcuserdata/pinky.xcuserdatad/xcschemes/xcschemem
 *.xcuserdatad
 xcuserdata/
 GameServer/.DS_Store
+.DS_Store
