@@ -10,14 +10,15 @@ This project is running on Mac OS.
 
 ### function list
 The functions are add in the following order:
-1. game run loop
-2. network 
-3. msg queue
-4. serialize
-5. database
+* game run loop
+* network 
+* msg queue
+* serialize
+* database
+* load server config, like socket port, db info
 
 ### functions in waiting list
-* load server config, like socket port, db info
+
 * load game config data
 
 ### threads
