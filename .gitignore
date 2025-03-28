@@ -11,3 +11,8 @@ GameServer/GameServer.xcodeproj/xcuserdata/pinky.xcuserdatad/xcschemes/xcschemem
 xcuserdata/
 GameServer/.DS_Store
 .DS_Store
+
+GameServer/build_xcode/*
+GameServer/build_mac/*
+GameServer/build_linux/*
+.vscode/
