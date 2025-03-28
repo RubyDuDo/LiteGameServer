@@ -16,3 +16,4 @@ GameServer/build_xcode/*
 GameServer/build_mac/*
 GameServer/build_linux/*
 .vscode/
+GameServer/bin/GameServer
