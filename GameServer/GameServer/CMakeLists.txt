@@ -14,7 +14,7 @@ target_sources(GameServer
     Buffer.hpp
     GameLoop.cpp
     GameLoop.hpp
-    Main.cpp
+    main.cpp
     MsgQueue.cpp 
     MsgQueue.hpp 
     NetworkMgr.cpp 
