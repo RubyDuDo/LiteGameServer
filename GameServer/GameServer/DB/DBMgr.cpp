@@ -7,6 +7,7 @@
 
 #include "DBMgr.hpp"
 #include <thread>
+#include <format>
 
 // 定义一个 ScopeGuard 类，当对象销毁时执行传入的 lambda 函数
 class ScopeGuard {

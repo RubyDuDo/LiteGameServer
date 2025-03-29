@@ -14,11 +14,11 @@ using namespace std;
 #include "proto/msg.pb.h"
 using namespace MyGame;
 
-constexpr unsigned short SVR_PORT_DEF = 8081;
-constexpr string DB_HOST_DEF = "tcp://127.0.0.1:3306";
-constexpr string DB_USER_DEF = "admin";
-constexpr string DB_PASSWD_DEF = "111111";
-constexpr string DB_NAME_DEF = "MyGame";
+const unsigned short SVR_PORT_DEF = 8081;
+const string DB_HOST_DEF = "tcp://127.0.0.1:3306";
+const string DB_USER_DEF = "admin";
+const string DB_PASSWD_DEF = "111111";
+const string DB_NAME_DEF = "MyGame";
 
 constexpr string config_dir = "./config.ini";
 bool GameLoop::Init()

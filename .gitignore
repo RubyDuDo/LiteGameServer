@@ -17,3 +17,5 @@ GameServer/build_mac/*
 GameServer/build_linux/*
 .vscode/
 GameServer/bin/GameServer
+GameServer/_deps
+GameServer/bin/*.so*

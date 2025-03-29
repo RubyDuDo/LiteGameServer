@@ -10,6 +10,11 @@
 #include <iostream>
 #include <sstream>
 
+#include <algorithm>
+#include <cctype>
+#include <format>
+
+
 
 void Section::addKeyValue( const string& strKey, const string& strValue )
 {
@@ -69,26 +74,15 @@ INIReader::INIReader()
 }
 
 
+std::string trim(const std::string& str) {
+    auto begin = std::find_if_not(str.begin(), str.end(), ::isspace);
+    auto end = std::find_if_not(str.rbegin(), str.rend(), ::isspace).base();
 
-// trim from start (in place)
-static inline void ltrim(std::string &s) {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
-        return !std::isspace(ch);
-    }));
+    if (begin >= end)
+        return ""; 
+    return std::string(begin, end);
 }
 
-// trim from end (in place)
-static inline void rtrim(std::string &s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
-        return !std::isspace(ch);
-    }).base(), s.end());
-}
-
-// trim from both ends (in place)
-static inline void trim(std::string &s) {
-    ltrim(s);
-    rtrim(s);
-}
 
 string INIReader::getLogString()
 {
