@@ -85,6 +85,11 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")  # macOS
         ${MYSQL_ROOT}/lib64/libcrypto.dylib
         ${MYSQL_ROOT}/lib64/libmysqlcppconn-static.a
     )
+
+    set_target_properties(GameServer PROPERTIES
+        BUILD_RPATH  ${MYSQL_ROOT}/lib64
+    )
+
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     message(STATUS "Detected platform: Linux")
     set( platform "linux" )
@@ -102,12 +107,6 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
-
-set_target_properties(GameServer PROPERTIES
-  INSTALL_RPATH "$ORIGIN/thirdlibs/lib"
-  BUILD_WITH_INSTALL_RPATH TRUE
-)
-
 
 include(FetchContent)
 
@@ -165,9 +164,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     INSTALL_RPATH "$ORIGIN")
 endif()
 
-# set_target_properties(GameServer PROPERTIES
-#     BUILD_RPATH "/usr/local/mysql-connector-c++/lib64"
-# )
+
 
 # set_target_properties(GameServer PROPERTIES
 #     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../bin
