@@ -1,53 +1,38 @@
 # GameServer
-This is a simple Game Server Project, including some basic functions like network, db, player management. After developping this project, I hope I can have a better understanding about the whole picture of game server developping. I also hope this project could help other people in need.
+## introduction
+This is a simple Game Server Project, which I plan to finish in two periods. 
+- **Phase 1**: A standalone game server with basic modules such as networking, database, and player management.
+- **Phase 2**: Add advanced features to improve scalability and performance.
 
-The client for this game server is https://github.com/RubyDuDo/GameClient.
+Through developping this project, I aim to review and enhance my back-end developping skills. I also hope this project could help other people in need.
 
-This Document will introduce some module of this server and list some problems I encounterred.
+The client for this game server is being developed in parallel:  
+🔗 [GameClient Repository](https://github.com/RubyDuDo/GameClient)  
+The server and client are built to ensure seamless communication between them.
 
-## General introduction
-This project is running on Mac OS.
+If you're interested in **which features are already implemented** and **what’s planned**, see:  
+📄 [`GameServer/doc/progress.md`](GameServer/doc/progress.md)
 
-### function list
-The functions are add in the following order:
-* game run loop
-* network 
-* msg queue
-* serialize
-* database
-* load server config, like socket port, db info
-
-### functions in waiting list
-
-* load game config data
-
-### threads
-* main thread: game update
-* network thread( listen, send, receive)
-* db query thread: 
+If you want to learn more about the **system design** or the **issues encountered during development**, check out:  
+📄 [`GameServer/doc/system_design.md`](GameServer/doc/system_design.md)
 
 
-## Network
+## build
+This project is managed using **CMake**.  
+> ⚠️ Currently, it only supports **macOS**.
+
+- Run `./build_xcode.sh` to generate an Xcode project.  
+  Make sure to change the working directory to `./GameServer/bin` before running the server — the required config files are located there.
+
+- Run `./build_mac.sh` to build the project directly and copy the executable to `./GameServer/bin`.  
+  ⚠️ When launching the server by double-clicking, the working directory will be your home folder, and the config file will fail to load. So run it from the command line instead.
 
 
-## Serialize
-When sending message between client and server, we need to serialize the messages instead of send the data directly, because two main reasons:
-* the difference between network order and host order. Some host using big endian order while others use small endian order. If the client and server has different choices, then they may misunderstand each other. This mainly effects data type like int, short.
-* the messages needed to send may have string, or vector data members, which's real data is somewhere out of their memory. If just send the data memory directly, these data are lost.
 
-For serialize, I chose protobuf, which is widely used for serializing.
+## Dependencies
+This project currently relies on two external libraries:
 
-## DB(Mysql)
+- `protobuf` (for serialization)
+- `mysql_connection` (for database access)
 
-### Considerations
-#### DB Query Context
-Different conditions may trigger a same db query, when we got db response, we need to know what to do next, so we need to save the context in some way. The context may not only include the original request from client, but also include current states of the dealing process. Moreover, db queries may not be triggered by client request. In summary, the way to save contexts must be very flexible to cover diverse conditions and params. 
-
-In this project, we use ` map<int, std::function<void( const DBResponse&)> > m_mapDBRspFuns; `to store the context. The key is a unique query ID generated when send query to db. and the function is a void( const DBResponse&) type. In fact, when the response comes back, the dealing process must need some extra information to finish jobs. In order to get these diverse information, lambda is used to catch needed local information. 
-
-In order to make the code looks cleaner, we can add a named function which contain params, and the lambda function invokes the named function and passes the local value captured to it. For example:  
-```cpp
-        addDBQuery( req , [sockID, this](const DBResponse& rsp ){
-            dealAddRole( sockID ,  rsp );
-        });
-```
+Both libraries are included in `./GameServer/thirdlibs`.
