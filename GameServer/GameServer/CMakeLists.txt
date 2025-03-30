@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 message(STATUS "CMake generator: ${CMAKE_GENERATOR}")
 
+message(STATUS " platform: ${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_GENERATOR}")
+
 
 add_executable(GameServer)
 
@@ -105,12 +107,12 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 
 else()
-    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}")
 endif()
 
 include(FetchContent)
 
-set(FETCHCONTENT_BASE_DIR "${CMAKE_SOURCE_DIR}/../_deps/${CMAKE_SYSTEM_NAME}")
+set(FETCHCONTENT_BASE_DIR "${CMAKE_SOURCE_DIR}/../_deps/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_GENERATOR}")
 
 
 set(protobuf_BUILD_SHARED_LIBS OFF)
