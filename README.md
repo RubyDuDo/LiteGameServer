@@ -19,7 +19,7 @@ If you want to learn more about the **system design** or the **issues encountere
 
 ## build
 This project is managed using **CMake**.  
-> ⚠️ Currently, it only supports **macOS**.
+It supports **macOS** and **linux** .
 
 - Run `./build_xcode.sh` to generate an Xcode project.  
   Make sure to change the working directory to `./GameServer/bin` before running the server — the required config files are located there.
@@ -27,6 +27,7 @@ This project is managed using **CMake**.
 - Run `./build_mac.sh` to build the project directly and copy the executable to `./GameServer/bin`.  
   ⚠️ When launching the server by double-clicking, the working directory will be your home folder, and the config file will fail to load. So run it from the command line instead.
 
+- Run `./build_linux.sh` to build the project directly and copy the executable to `./GameServer/bin`.  
 
 
 ## Dependencies
@@ -35,4 +36,4 @@ This project currently relies on two external libraries:
 - `protobuf` (for serialization)
 - `mysql_connection` (for database access)
 
-Both libraries are included in `./GameServer/thirdlibs`.
+mysql_connection are included in `./GameServer/thirdlibs`. Protobuf is managed using `fetch content` function in CMake, so it will be download during configuring. So if you download this project, it may need network and git to build the first time. 
