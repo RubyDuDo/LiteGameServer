@@ -27,7 +27,7 @@ private:
     
     virtual void onReceiveMsgInner( int fd, const std::string& msg );
     virtual void onDisconnectInner( int fd );
-    virtual void onConnectInner( int fd );
+    virtual void onConnectInner( shared_ptr<TcpSocket> sock  );
     
     //move msg from msgqueue to individual slots
     void dispatchSendMsg();

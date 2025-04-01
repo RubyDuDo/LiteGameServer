@@ -8,6 +8,7 @@
 #include "NetSlot.hpp"
 #include <string>
 #include <iostream>
+#include <arpa/inet.h>
 
 constexpr int RECV_BUFF = 1500;
 

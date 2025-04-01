@@ -26,6 +26,8 @@ public:
     bool run();
     
     void update();
+
+    ~GameLoop();
     
 public:
     void onReceiveMsg( int sockID,const Msg& packet );
@@ -51,7 +53,7 @@ public:
     
     virtual void onReceiveMsg( int fd, const std::string& msg );
     virtual void onDisconnect( int fd ) ;
-    virtual void onConnect( int fd ) ;
+    virtual void onConnect( const TcpSocket& sock ) ;
     
 private:
     int m_nextRoleID = 1;

@@ -20,7 +20,7 @@ class INetHandler{
 public:
     virtual void onReceiveMsg( int fd, const std::string& msg ) = 0;
     virtual void onDisconnect( int fd ) = 0;
-    virtual void onConnect( int fd ) = 0;
+    virtual void onConnect( const TcpSocket& sock ) = 0;
 };
 
 class INetworkMgr
@@ -40,18 +40,19 @@ public:
     virtual ~INetworkMgr();
     
 protected:
-    void onReceiveMsg( std::shared_ptr<TcpSocket> sock );
+    int onReceiveMsg( std::shared_ptr<TcpSocket> sock );
     void onDisconnect( int fd );
-    void onConnect( int fd ) ;
+    void onConnect( shared_ptr<TcpSocket> sock ) ;
     
 private:
     virtual void onReceiveMsgInner( int fd, const std::string& msg ) = 0;
     virtual void onDisconnectInner( int fd ) = 0;
-    virtual void onConnectInner( int fd ) = 0;
+    virtual void onConnectInner( shared_ptr<TcpSocket> sock  ) = 0;
     
 private:
     virtual void innerInit() = 0;
     virtual void innerRun() = 0 ;
+    virtual void innerSendMsg( int fd, const std::string& msg ) ;
 private:
     static unique_ptr<INetworkMgr> m_pInstance;
 protected:
@@ -59,6 +60,7 @@ protected:
     
     std::shared_ptr<TcpSocket> m_listenSock;
     std::vector< TcpSocketPtr > m_setSocks;
+    std::map< int, TcpSocketPtr > m_mapSocks;
     
     MsgQueue< std::pair<int, std::string> > m_msgQueue;
     std::map<int, NetSlot> m_mapSlot;

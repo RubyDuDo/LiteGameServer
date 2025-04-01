@@ -197,3 +197,15 @@ int TcpSocket::setNonBlock( bool bNonBlock )
     return ret;
     
 }
+
+int TcpSocket::setReuseAddr( bool bReuse )
+{
+    int opt = bReuse ? 1 : 0;
+    int ret = setsockopt( m_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) );
+    if( ret < 0 )
+    {
+        perror("setsockopt(SO_REUSEADDR) failed");
+    }
+    
+    return ret;
+}

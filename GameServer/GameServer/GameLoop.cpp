@@ -91,7 +91,7 @@ void GameLoop::onDisconnect( int fd )
     
 }
 
-void GameLoop::onConnect( int fd )
+void GameLoop::onConnect( const TcpSocket& sock )
 {
     
 }
@@ -371,4 +371,12 @@ void GameLoop::dealLogout( int sockID, const Msg& msg )
     cout<<"Receive Logout "<< logout.roleid()<<"_ sock:"<<sockID <<endl;
     
     m_playerMgr.onPlayerLogout( sockID, logout.roleid() );
+}
+
+GameLoop::~GameLoop()
+{
+    INetworkMgr::getInstance()->shutdown();
+    // m_db.shutdown();
+    
+    cout<<"GameLoop Shutdown!"<<endl;
 }

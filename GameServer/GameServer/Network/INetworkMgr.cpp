@@ -35,6 +35,9 @@ std::unique_ptr<INetworkMgr> INetworkMgrFactory::createNetworkMgr()
 bool INetworkMgr::initNetwork( unsigned short svr_port )
 {
     m_listenSock = NetUtil::createTcpSocket();
+    m_listenSock->setReuseAddr(true);
+    cout<<"setReuseAddr"<<endl;
+    m_listenSock->setNonBlock( true );
     
     m_listenSock->Bind( svr_port );
     
@@ -69,7 +72,7 @@ INetworkMgr::~INetworkMgr()
     
 }
 
-void INetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock )
+int INetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock )
 {
     //do receive
     char buff[RECV_BUFF]{};
@@ -77,9 +80,7 @@ void INetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock )
     cout<<"receiveData:"<<ret<<": from :"<<sock->m_sock<<endl;
     if( ret == 0 )
     {
-        //todo ,
-        sock->setValid( false );
-        return;
+        return ret;
     }
     else if( ret > 0 )
     {
@@ -97,6 +98,8 @@ void INetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock )
             }
         }
     }
+
+    return ret;
 }
 
 void INetworkMgr::onDisconnect( int fd )
@@ -109,14 +112,21 @@ void INetworkMgr::onDisconnect( int fd )
     }
 }
 
-void INetworkMgr::onConnect( int fd )
+void INetworkMgr::onConnect( shared_ptr<TcpSocket> sock )
 {
-    m_mapSlot[ fd ] = NetSlot();
+    sock->setNonBlock( true );
+    m_mapSocks[sock->m_sock] = sock;
+    m_mapSlot[ sock->m_sock ] = NetSlot();
     
-    onConnectInner(fd);
+    onConnectInner( sock );
     if( m_netHandler )
     {
-        m_netHandler->onConnect( fd );
+        m_netHandler->onConnect( *sock );
     }
+}
+
+void INetworkMgr::innerSendMsg( int fd, const std::string& msg )
+{
+
 }
 

@@ -36,6 +36,7 @@ public:
     int RecvData( char* buff, int maxLen );
     
     int setNonBlock( bool bNonBlock );
+    int setReuseAddr( bool bReuse );
     
     void setValid( bool bValid );
     bool isValid( );

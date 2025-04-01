@@ -18,7 +18,7 @@ void NetworkMgrSelect::shutdown()
 void NetworkMgrSelect::innerInit()
 {
     m_setSocks.push_back( m_listenSock );
-    m_maxFd = m_listenSock->m_sock;
+    m_maxFd = m_listenSock->m_sock + 1 ;
 }
 
 void NetworkMgrSelect::onReceiveMsgInner( int fd, const std::string& msg )
@@ -29,12 +29,12 @@ void NetworkMgrSelect::onDisconnectInner( int fd )
 {
     
 }
-void NetworkMgrSelect::onConnectInner( int fd )
+void NetworkMgrSelect::onConnectInner( shared_ptr<TcpSocket> sock  )
 {
     
-    if( fd > m_maxFd)
+    if( sock->m_sock >= m_maxFd )
     {
-        m_maxFd = fd;
+        m_maxFd = sock->m_sock + 1 ;
     }
 }
 
@@ -82,7 +82,7 @@ void NetworkMgrSelect::innerRun()
                     if( sock )
                     {
                         m_setSocks.push_back( sock );
-                        onConnect( sock->m_sock );
+                        onConnect( sock );
                     }
                 }
                 else{
