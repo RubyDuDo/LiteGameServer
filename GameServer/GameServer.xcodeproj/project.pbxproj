@@ -41,6 +41,7 @@
 		BEC12F2B2D72EF0400EA4DB2 /* Exceptions for "GameServer" folder in "GameServer" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Network/NetworkMgr.cpp,
 				proto/msg.proto,
 			);
 			target = BE04CA012D66F67D00492E0C /* GameServer */;

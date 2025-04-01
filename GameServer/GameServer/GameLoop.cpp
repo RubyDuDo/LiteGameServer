@@ -10,7 +10,6 @@
 #include <thread>
 using namespace std;
 
-#include "NetworkMgr.hpp"
 #include "proto/msg.pb.h"
 using namespace MyGame;
 
@@ -26,14 +25,15 @@ bool GameLoop::Init()
     int res = m_config.ParseFile( config_dir );
     
     unsigned short port = (unsigned short)m_config.getInt( "Network" , "port", SVR_PORT_DEF );
-    bool ret = NetworkMgr::getInstance()->InitNetwork( port );
+    
+    bool ret = true;
+    ret = INetworkMgr::getInstance()->initNetwork( port );
     if( ret )
     {
-        NetworkMgr::getInstance()->registerReceiveMsgHandle(
-                                                            std::bind( &GameLoop::onReceiveMsg, this,
-                                                                      std::placeholders::_1,
-                                                                      std::placeholders::_2)
-                                                            );
+        INetworkMgr::getInstance()->registerHandler( this );
+    }
+    else{
+        cout<<"Init network fail"<<endl;
     }
     
     string host = m_config.getString("DB", "host", DB_HOST_DEF );
@@ -73,6 +73,27 @@ bool GameLoop::run()
     
     //
     return true;
+}
+
+void GameLoop::onReceiveMsg( int fd, const std::string& msg )
+{
+    Msg packet;
+    if( !packet.ParseFromString( msg ))
+    {
+        cout<<"Parse head fail!"<<endl;
+        return;
+    }
+    m_recvMsgs.push( make_pair( fd, packet ));
+}
+
+void GameLoop::onDisconnect( int fd )
+{
+    
+}
+
+void GameLoop::onConnect( int fd )
+{
+    
 }
 
 void GameLoop::update()
@@ -148,7 +169,7 @@ void GameLoop::dealQueryAccount( int sockID, const string& strPasswd, const DBRe
     if( rsp.head().res() == DBErr_NotExist )
     {
         ResponseLogin outMsg;
-        NetworkMgr::getInstance()->addTcpQueue( sockID, MsgType_Login, MsgErr_NotExist, outMsg);
+        NetSendHelper::addTcpQueue( sockID, MsgType_Login, MsgErr_NotExist, outMsg);
     }
     
     DBRspAccout query;
@@ -181,7 +202,7 @@ void GameLoop::dealQueryAccount( int sockID, const string& strPasswd, const DBRe
             //notify client fail
             
             ResponseLogin outMsg;
-            NetworkMgr::getInstance()->addTcpQueue( sockID, MsgType_Login, MsgErr_PasswdWrong, outMsg);
+            NetSendHelper::addTcpQueue( sockID, MsgType_Login, MsgErr_PasswdWrong, outMsg);
             return;
         }
     
@@ -213,7 +234,7 @@ void GameLoop::dealAddRole( int sockID, const DBResponse& rsp )
     if( rsp.head().res() == DBErr_NotExist )
     {
         ResponseLogin outMsg;
-        NetworkMgr::getInstance()->addTcpQueue( sockID, MsgType_Login, MsgErr_NotExist, outMsg);
+        NetSendHelper::addTcpQueue( sockID, MsgType_Login, MsgErr_NotExist, outMsg);
     }
     
     DBRspRole query;
@@ -228,7 +249,7 @@ void GameLoop::dealAddRole( int sockID, const DBResponse& rsp )
     ResponseLogin rspLogin;
     rspLogin.set_roleid( query.roleid() );
     rspLogin.set_rolelevel( query.level() );
-    NetworkMgr::getInstance()->addTcpQueue( sockID, MsgType_Login, MsgErr_OK, rspLogin);
+    NetSendHelper::addTcpQueue( sockID, MsgType_Login, MsgErr_OK, rspLogin);
     
     
     
@@ -244,7 +265,7 @@ void GameLoop::dealQueryRole( int sockID, const DBResponse& rsp  )
     if( rsp.head().res() == DBErr_NotExist )
     {
         ResponseLogin outMsg;
-        NetworkMgr::getInstance()->addTcpQueue( sockID, MsgType_Login, MsgErr_NotExist, outMsg);
+        NetSendHelper::addTcpQueue( sockID, MsgType_Login, MsgErr_NotExist, outMsg);
     }
     
     DBRspRole query;
@@ -259,7 +280,7 @@ void GameLoop::dealQueryRole( int sockID, const DBResponse& rsp  )
     ResponseLogin rspLogin;
     rspLogin.set_roleid( query.roleid() );
     rspLogin.set_rolelevel( query.level() );
-    NetworkMgr::getInstance()->addTcpQueue( sockID, MsgType_Login, MsgErr_OK, rspLogin);
+    NetSendHelper::addTcpQueue( sockID, MsgType_Login, MsgErr_OK, rspLogin);
     
 }
 
@@ -335,7 +356,7 @@ void GameLoop::dealAction( int sockID, const Msg& msg )
     ResponseAct rsp;
     rsp.set_action( act.action() );
     
-    NetworkMgr::getInstance()->addTcpQueue( sockID, MsgType_Act, MsgErr_OK, rsp);
+    NetSendHelper::addTcpQueue( sockID, MsgType_Act, MsgErr_OK, rsp);
     
 }
 

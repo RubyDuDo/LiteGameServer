@@ -9,13 +9,17 @@
 #define GameLoop_hpp
 
 #include <stdio.h>
-#include "NetworkMgr.hpp"
 #include "Player/PlayerMgr.hpp"
 #include "DB/DBMgr.hpp"
 #include "proto/dbmsg.pb.h"
 #include "DataReader/INIReader.hpp"
 
-class GameLoop
+#include "Network/INetworkMgr.hpp"
+#include "GameNetHelper.hpp"
+
+
+
+class GameLoop : public INetHandler
 {
 public:
     bool Init();
@@ -43,6 +47,12 @@ public:
     
     void addDBQuery( const DBRequest& req, std::function<void( const DBResponse&)> func );
     
+public:
+    
+    virtual void onReceiveMsg( int fd, const std::string& msg );
+    virtual void onDisconnect( int fd ) ;
+    virtual void onConnect( int fd ) ;
+    
 private:
     int m_nextRoleID = 1;
     PlayerManager m_playerMgr;
@@ -56,5 +66,6 @@ private:
     
     map<int, std::function<void( const DBResponse&)> > m_mapDBRspFuns;
 };
+
 
 #endif /* GameLoop_hpp */

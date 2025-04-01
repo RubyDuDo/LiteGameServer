@@ -10,21 +10,17 @@
 
 #include <stdio.h>
 #include <string>
-#include "TcpSocket.hpp"
+#include "../TcpSocket.hpp"
 #include <map>
-#include "proto/msg.pb.h"
+#include "../proto/msg.pb.h"
 using namespace MyGame;
+#include <memory>
 
-#include "Buffer.hpp"
+#include "../Buffer.hpp"
 
 class GameLoop;
 
-class ProtobufHelp
-{
-public:
-    static MsgHead* CreatePacketHead( MsgType type );
-    static MsgRspHead* CreateRspHead( MsgType type, MsgErrCode res );
-};
+
 
 #include <set>
 
@@ -34,11 +30,12 @@ public:
     Slot():m_recvBuff(), m_sendBuff(){};
     
     void sendMsg( const MsgRsp& msg );
-    std::shared_ptr<Msg> getNextRecvMsg();
+    std::shared_ptr<std::string> getNextRecvMsg();
 public:
     Buffer m_recvBuff;
     Buffer m_sendBuff;
 };
+
 
 class NetworkMgr
 {

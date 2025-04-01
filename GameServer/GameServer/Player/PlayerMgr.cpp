@@ -6,7 +6,8 @@
 //
 
 #include "PlayerMgr.hpp"
-#include "../NetworkMgr.hpp"
+#include "../GameNetHelper.hpp"
+
 #include <iostream>
 using namespace std;
 
@@ -75,7 +76,7 @@ void PlayerManager::onPlayerLogin( int sockID, const string& strName, const stri
     ResponseLogin rsp;
     rsp.set_roleid( roleID );
     
-    NetworkMgr::getInstance()->addTcpQueue( sockID, MsgType_Login, MsgErr_OK, rsp);
+    NetSendHelper::addTcpQueue( sockID, MsgType_Login, MsgErr_OK, rsp);
 }
 
 void PlayerManager::onPlayerLogout( int sockID, int roleID )
@@ -103,7 +104,7 @@ void PlayerManager::onPlayerLogout( int sockID, int roleID )
     ResponseLogout rsp;
     rsp.set_roleid( roleID );
     
-    NetworkMgr::getInstance()->addTcpQueue( sockID,MsgType_Logout, MsgErr_OK,  rsp);
+    NetSendHelper::addTcpQueue( sockID,MsgType_Logout, MsgErr_OK,  rsp);
 }
 
 bool PlayerManager::isPlayerOnline( int roleID )

@@ -38,49 +38,9 @@ MsgRspHead* ProtobufHelp::CreateRspHead( MsgType type, MsgErrCode res )
 }
 
 
-void Slot::sendMsg( const MsgRsp& msg )
-{
-    cout<<"Slot SendMsg:"<<msg.head().type()<<endl;
-    std::string strData = msg.SerializeAsString();
-    
-    short sendLen = strData.length();
-    
-    short len = htons( sendLen );
-    m_sendBuff.addData( (char*)&len, sizeof(short) );
-    m_sendBuff.addData( (char*)strData.c_str(), sendLen );
-}
 
-std::shared_ptr<Msg> Slot::getNextRecvMsg()
-{
-    //TCP拆包
-    if( m_recvBuff.getSize() > sizeof( short ) )
-    {
-        char msgbuff[RECV_BUFF]{};
-        short len = 0;
-        m_recvBuff.getData( (char*)&len, sizeof(short));
-        len = ntohs( len );
-        if( m_recvBuff.getSize() >= len + sizeof(short) )
-        {
-            m_recvBuff.consumeData( sizeof( short ) );
-            m_recvBuff.getData( msgbuff,  RECV_BUFF );
-            m_recvBuff.consumeData( len );
-            
-            std::string data( msgbuff, len );
-            Msg msg;
-            if( !msg.ParseFromString( data ))
-            {
-                cout<<"Parse head fail!"<<endl;
-                return nullptr;
-            }
-            
-//            cout<<"Parse Msg:" << msg.head().type()<<"_______"<<msg.DebugString()<<endl;
-        
-            return std::make_shared<Msg>(msg);
-        }
-    }
-    
-    return nullptr;
-}
+
+
 
 NetworkMgr* NetworkMgr::getInstance()
 {

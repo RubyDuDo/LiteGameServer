@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include <memory>
-#include "../MsgQueue.hpp"
+#include "../Utils/MsgQueue.hpp"
 #include "../proto/dbmsg.pb.h"
 #include "mysql/jdbc.h"
 using namespace MyGameDB;

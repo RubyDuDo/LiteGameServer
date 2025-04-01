@@ -16,17 +16,50 @@ add_executable(GameServer)
 
 target_sources(GameServer
     PRIVATE
-    Buffer.cpp
-    Buffer.hpp
     GameLoop.cpp
     GameLoop.hpp
     main.cpp
-    MsgQueue.cpp 
-    MsgQueue.hpp 
-    NetworkMgr.cpp 
-    NetworkMgr.hpp
-    TcpSocket.cpp
-    TcpSocket.hpp)
+    GameNetHelper.cpp 
+    GameNetHelper.hpp
+)
+
+target_sources(GameServer
+    PRIVATE
+    Utils/Buffer.hpp
+    Utils/Buffer.cpp
+    Utils/MsgQueue.cpp 
+    Utils/MsgQueue.hpp 
+)
+
+source_group("Utils" FILES
+    Utils/Buffer.hpp
+    Utils/Buffer.cpp
+    Utils/MsgQueue.cpp 
+    Utils/MsgQueue.hpp 
+)
+
+target_sources(GameServer
+    PRIVATE
+    Network/TcpSocket.hpp
+    Network/TcpSocket.cpp
+    Network/INetworkMgr.cpp 
+    Network/INetworkMgr.hpp 
+    Network/NetSlot.cpp 
+    Network/NetSlot.hpp 
+    Network/NetworkMgrSelect.cpp 
+    Network/NetworkMgrSelect.hpp 
+)
+
+source_group("Network" FILES
+    Network/TcpSocket.hpp
+    Network/TcpSocket.cpp
+    Network/INetworkMgr.cpp 
+    Network/INetworkMgr.hpp 
+    Network/NetSlot.cpp 
+    Network/NetSlot.hpp 
+    Network/NetworkMgrSelect.cpp 
+    Network/NetworkMgrSelect.hpp 
+)
 
 target_sources(GameServer
     PRIVATE
