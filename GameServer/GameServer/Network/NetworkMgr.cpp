@@ -60,6 +60,7 @@ bool NetworkMgr::InitNetwork( unsigned short svr_port )
     m_listenSock->Listen();
     
     m_setSocks.push_back( m_listenSock );
+
     m_maxFd = m_listenSock->m_sock;
     
     std::thread th(&NetworkMgr::networkNonBlockThread, this );

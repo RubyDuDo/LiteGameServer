@@ -85,6 +85,7 @@ TcpSocket::TcpSocket( int sock ): m_sock( sock )
 
 TcpSocket::~TcpSocket()
 {
+    std::cout<<"~TcpSocket:"<< m_sock<<std::endl;
     close( m_sock );
 }
 

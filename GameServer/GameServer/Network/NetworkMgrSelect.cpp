@@ -10,15 +10,17 @@
 constexpr int RECV_BUFF = 1500;
 
 
-void NetworkMgrSelect::shutdown()
+void NetworkMgrSelect::innerShutdown()
 {
     
 }
 
-void NetworkMgrSelect::innerInit()
+bool NetworkMgrSelect::innerInit()
 {
     m_setSocks.push_back( m_listenSock );
     m_maxFd = m_listenSock->m_sock + 1 ;
+
+    return true;
 }
 
 void NetworkMgrSelect::onReceiveMsgInner( int fd, const std::string& msg )
@@ -57,7 +59,7 @@ void NetworkMgrSelect::dispatchSendMsg()
 void NetworkMgrSelect::innerRun()
 {
     std::cout<<"network Thread( Select: Nonblock Mode) started!"<<std::endl;
-    while( true )
+    while( m_bRunning )
     {
         clearInvalidSock();
         

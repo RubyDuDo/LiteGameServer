@@ -21,8 +21,8 @@ public:
     virtual ~NetworkMgrSelect();
     
 private:
-    virtual void shutdown() ;
-    virtual void innerInit();
+    virtual void innerShutdown() ;
+    virtual bool innerInit();
     virtual void innerRun();
     
     virtual void onReceiveMsgInner( int fd, const std::string& msg );

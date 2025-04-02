@@ -8,13 +8,14 @@
 #include <iostream>
 
 constexpr int RECV_BUFF = 1500;
+
     
 NetworkMgrEpoll::~NetworkMgrEpoll()
 {
-    shutdown();
+    shutdownNetwork();
 }
 
-void NetworkMgrEpoll::shutdown()
+void NetworkMgrEpoll::innerShutdown()
 {
     if( m_epollFd != -1 )
     {
@@ -28,19 +29,18 @@ void NetworkMgrEpoll::shutdown()
     }
 }
 
-void NetworkMgrEpoll::innerInit()
+bool NetworkMgrEpoll::innerInit()
 {
     m_epollFd = epoll_create1( EPOLL_CLOEXEC );
     if (m_epollFd == -1) {
         perror("epoll_create1");
-        exit(EXIT_FAILURE);
+        return false;
     }
 
     m_eventFd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC );
     if (m_eventFd == -1) {
         perror("eventfd");
-        close(m_epollFd); 
-        exit(EXIT_FAILURE);
+        return false;
     }
 
     struct epoll_event evListen;
@@ -48,8 +48,7 @@ void NetworkMgrEpoll::innerInit()
     evListen.events = EPOLLIN | EPOLLET;
     if (epoll_ctl(m_epollFd, EPOLL_CTL_ADD, m_listenSock->m_sock, &evListen) == -1) {
         perror("epoll_ctl: listen_sock");
-        shutdown();
-        exit(EXIT_FAILURE);
+        return false;
     }
 
     struct epoll_event evEvent;
@@ -58,15 +57,16 @@ void NetworkMgrEpoll::innerInit()
     if( epoll_ctl(m_epollFd, EPOLL_CTL_ADD, m_eventFd, &evEvent) == -1 )
     {
         perror("epoll_ctl: event_fd");
-        shutdown();
-        exit(EXIT_FAILURE);
+        return false;
     }
+
+    return true;
 }
 
 void NetworkMgrEpoll::innerRun()
 {
     std::cout<<"network Thread( Epoll: Nonblock Mode) started!"<<std::endl;
-    while(true)
+    while( m_bRunning )
     {
         const int MAX_EVENTS = 10;
         std::vector<struct epoll_event> events(MAX_EVENTS);
@@ -124,8 +124,14 @@ void NetworkMgrEpoll::onSockEvent( const struct epoll_event& ev )
 {
     int fd = ev.data.fd;
     uint32_t events = ev.events;
-    auto sock = m_mapSocks[fd];
 
+    auto it = m_mapSocks.find(fd);
+    if( it == m_mapSocks.end() )
+    {
+        return;
+    }
+
+    auto sock = it->second;
     if( sock == nullptr )
     {
         return;
@@ -138,18 +144,7 @@ void NetworkMgrEpoll::onSockEvent( const struct epoll_event& ev )
     }
 
     if (events & EPOLLIN) {
-        int ret = onReceiveMsg( sock );
-        if( ret == 0 )
-        {
-            onDisconnect(fd);
-            return;
-        }
-        else if( ret < 0 )
-        {
-            perror("recv error");
-            onDisconnect(fd);
-            return; 
-        }
+        onReceiveMsg( sock );
     }
 
     if (events & EPOLLOUT) {
@@ -161,6 +156,7 @@ void NetworkMgrEpoll::onSockEvent( const struct epoll_event& ev )
 
 void NetworkMgrEpoll::handleSendMsg( TcpSocket& sock )
 {
+    cout<<"handleSendMsg:"<<sock.m_sock<<endl;
     NetSlot& slot = m_mapSlot[ sock.m_sock];
 
     char buff[RECV_BUFF] = {};
@@ -187,7 +183,6 @@ void NetworkMgrEpoll::handleSendMsg( TcpSocket& sock )
         ev.events = EPOLLIN | EPOLLET ;
         if (epoll_ctl(m_epollFd, EPOLL_CTL_MOD, sock.m_sock, &ev) == -1) {
             perror("epoll_ctl: fd");
-            return;
         }
     }
 
@@ -195,17 +190,27 @@ void NetworkMgrEpoll::handleSendMsg( TcpSocket& sock )
 
 void NetworkMgrEpoll::onNewSendMsg()
 {
+    cout<<"onNewSendMsg:"<<endl;
     while( true )
     {
         auto it = m_msgQueue.try_pop();
         if( it )
         {
-            NetSlot& slot = m_mapSlot[it->first];
+            auto itSlot = m_mapSlot.find( it->first );
+            if( itSlot == m_mapSlot.end() )
+            {
+                std::cout<<"sendMsg: slot not found:"<<it->first<<std::endl;
+                continue;
+            }
+
+            cout<<"sendMsg:"<<it->first<<":"<<it->second.size()<<endl;
+
+            NetSlot& slot = itSlot->second;
             slot.sendMsg( it->second );
 
             struct epoll_event ev;
             ev.data.fd = it->first;
-            ev.events = EPOLLOUT | EPOLLET | EPOLLOUT;
+            ev.events = EPOLLIN | EPOLLET | EPOLLOUT;
             if (epoll_ctl(m_epollFd, EPOLL_CTL_MOD, it->first, &ev) == -1) {
                 perror("epoll_ctl: fd");
                 continue;
@@ -219,6 +224,7 @@ void NetworkMgrEpoll::onNewSendMsg()
 
 void NetworkMgrEpoll::onReceiveMsgInner( int fd, const std::string& msg )
 {
+    cout<<"onReceiveMsg:"<<fd<<endl;
 
 }
 
@@ -238,7 +244,7 @@ void NetworkMgrEpoll::onConnectInner( shared_ptr<TcpSocket> sock  )
 {
     struct epoll_event ev;
     ev.data.fd = sock->m_sock;
-    ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP;
+    ev.events = EPOLLIN | EPOLLET ;
     if (epoll_ctl(m_epollFd, EPOLL_CTL_ADD, sock->m_sock, &ev) == -1) {
         perror("epoll_ctl: fd");
         return;

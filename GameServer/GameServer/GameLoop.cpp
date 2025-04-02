@@ -34,6 +34,7 @@ bool GameLoop::Init()
     }
     else{
         cout<<"Init network fail"<<endl;
+        return false;
     }
     
     string host = m_config.getString("DB", "host", DB_HOST_DEF );
@@ -375,7 +376,7 @@ void GameLoop::dealLogout( int sockID, const Msg& msg )
 
 GameLoop::~GameLoop()
 {
-    INetworkMgr::getInstance()->shutdown();
+    INetworkMgr::getInstance()->shutdownNetwork();
     // m_db.shutdown();
     
     cout<<"GameLoop Shutdown!"<<endl;

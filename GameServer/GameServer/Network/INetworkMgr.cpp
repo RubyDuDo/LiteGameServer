@@ -14,6 +14,11 @@
 #endif
 using namespace std;
 
+#include <algorithm>
+
+#include <cerrno>
+#include <cstring>
+
 constexpr int RECV_BUFF = 1500;
 
 unique_ptr<INetworkMgr> INetworkMgr::m_pInstance = nullptr;
@@ -49,13 +54,30 @@ bool INetworkMgr::initNetwork( unsigned short svr_port )
     
     m_listenSock->Listen();
     
-    innerInit();
+    bool bRet = innerInit();
+    if( bRet == false )
+    {
+        cout<<"init network fail!"<<endl;
+        return false;
+    }
+
+    m_bRunning = true;
     
-    std::thread th(&INetworkMgr::networkThread, this );
-    th.detach();
+    m_runThread.emplace(&INetworkMgr::networkThread, this);
     
     return true;
     
+}
+
+void INetworkMgr::shutdownNetwork()
+{
+    innerShutdown();
+
+    m_bRunning = false;
+    if( m_runThread && m_runThread->joinable() )
+    {
+        m_runThread->join();
+    }
 }
 
 void INetworkMgr::registerHandler(INetHandler* handler)
@@ -70,7 +92,9 @@ void INetworkMgr::networkThread()
 
 void INetworkMgr::sendMsg( int fd, const std::string& msg )
 {
+    cout<<"sendMsg:"<<fd<<":"<<msg.size()<<endl;
     m_msgQueue.push( make_pair( fd, msg ));
+    innerSendMsg( fd, msg );
 }
 
 INetworkMgr::~INetworkMgr()
@@ -78,21 +102,66 @@ INetworkMgr::~INetworkMgr()
     
 }
 
-int INetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock )
+bool INetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock )
 {
+    cout<<"onReceiveMsg:"<<sock->m_sock<<endl;
+    NetSlot& slot = m_mapSlot[sock->m_sock];
     //do receive
     char buff[RECV_BUFF]{};
     int ret = sock->RecvData( buff, RECV_BUFF );
     cout<<"receiveData:"<<ret<<": from :"<<sock->m_sock<<endl;
-    if( ret == 0 )
+    bool bClose = false;
+    while( true )
     {
-        return ret;
+        if( ret < 0 )
+        {
+            int err = errno;
+            if( err == EAGAIN || err == EWOULDBLOCK )
+            {
+                //no more data
+            }
+            else if( err == EINTR )
+            {
+                //interrupted, just try again in next loop
+            }
+            else if( err == ECONNRESET )
+            {
+                //client close
+                bClose = true;
+                cout<<"client close:"<<sock->m_sock<<endl;
+            }
+            else
+            {
+                //error
+                bClose = true;
+                cout<<"recv error:"<<strerror(err)<<endl;
+            }
+            //error
+            break;
+        }
+        else if( ret == 0 )
+        {
+            // client close
+            bClose = true;
+            break;
+        }
+        else
+        {
+            slot.m_recvBuff.addData( buff, ret );
+            if( ret < RECV_BUFF )
+            {
+                break;
+            }
+            else
+            {
+                ret = sock->RecvData( buff, RECV_BUFF );
+            }
+        }
     }
-    else if( ret > 0 )
-    {
-        NetSlot& slot = m_mapSlot[sock->m_sock];
-        slot.m_recvBuff.addData( buff, ret );
-        
+
+    cout<<"onReceiveMsg, Send to Slot:"<<sock->m_sock<<endl;
+
+    do{
         auto pMsg = slot.getNextRecvMsg();
         if( pMsg )
         {
@@ -103,14 +172,41 @@ int INetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock )
                 m_netHandler->onReceiveMsg( sock->m_sock, *pMsg );
             }
         }
+        else{
+            break;
+        }
+    }while( true );
+
+    cout<<"onReceiveMsg, End:"<<sock->m_sock<<endl;
+
+    if( bClose )
+    {
+        onDisconnect( sock->m_sock );
     }
 
-    return ret;
+    return bClose;
 }
 
 void INetworkMgr::onDisconnect( int fd )
 {
+    cout<<"onDisconnect:"<<fd<<endl;
+    if( m_mapSocks.find( fd ) == m_mapSocks.end() )
+    {
+        return;
+    }
+
     onDisconnectInner(fd);
+
+    m_mapSlot.erase( fd );
+    m_mapSocks.erase( fd );
+
+    auto it = std::find_if( m_setSocks.begin(), m_setSocks.end(), [fd]( const TcpSocketPtr& sock ) {
+        return sock->m_sock == fd;
+    });
+    if( it != m_setSocks.end() )
+    {
+        m_setSocks.erase( it );
+    }
     
     if( m_netHandler )
     {
@@ -120,6 +216,7 @@ void INetworkMgr::onDisconnect( int fd )
 
 void INetworkMgr::onConnect( shared_ptr<TcpSocket> sock )
 {
+    cout<<"onConnect:"<<sock->m_sock<<endl;
     sock->setNonBlock( true );
     m_mapSocks[sock->m_sock] = sock;
     m_mapSlot[ sock->m_sock ] = NetSlot();
