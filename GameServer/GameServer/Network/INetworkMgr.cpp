@@ -9,6 +9,9 @@
 #include <thread>
 #include <iostream>
 #include "NetworkMgrSelect.hpp"
+#ifdef __LINUX__
+#include "NetworkMgrEpoll.hpp"
+#endif
 using namespace std;
 
 constexpr int RECV_BUFF = 1500;
@@ -27,8 +30,11 @@ INetworkMgr* INetworkMgr::getInstance()
 
 std::unique_ptr<INetworkMgr> INetworkMgrFactory::createNetworkMgr()
 {
-    //todo
+#ifdef __LINUX__
+    return make_unique<NetworkMgrEpoll>();
+#else
     return make_unique<NetworkMgrSelect>();
+#endif
 }
 
 

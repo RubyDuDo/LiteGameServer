@@ -13,7 +13,7 @@ This project is going to develop a simple game server framework from scratch. It
 * login manager
 * id generator
 * password encrypto
-* epoll
+
 
 ### Scalable Server System
 * load balancer
@@ -29,3 +29,4 @@ This project is going to develop a simple game server framework from scratch. It
 * login
 * load server config
 * cmake
+* epoll

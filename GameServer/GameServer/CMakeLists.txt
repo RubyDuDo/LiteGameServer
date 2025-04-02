@@ -137,6 +137,20 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
         ${MYSQL_ROOT}/lib64/libmysqlcppconn.so.9.8.2.0
     )
 
+    target_compile_definitions(GameServer
+        PRIVATE
+        -D__LINUX__
+    )
+
+    target_sources(GameServer
+        PRIVATE
+        Network/NetworkMgrEpoll.cpp 
+        Network/NetworkMgrEpoll.hpp)
+
+    source_group("Network" FILES
+        Network/NetworkMgrEpoll.cpp
+        Network/NetworkMgrEpoll.hpp
+)
 
 
 else()
