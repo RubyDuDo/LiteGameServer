@@ -36,6 +36,8 @@ target_sources(GameServer
     Utils/Buffer.cpp
     Utils/MsgQueue.cpp 
     Utils/MsgQueue.hpp 
+    Utils/LoggerHelper.cpp 
+    Utils/LoggerHelper.hpp
 )
 
 source_group("Utils" FILES
@@ -43,6 +45,8 @@ source_group("Utils" FILES
     Utils/Buffer.cpp
     Utils/MsgQueue.cpp 
     Utils/MsgQueue.hpp 
+    Utils/LoggerHelper.cpp 
+    Utils/LoggerHelper.hpp
 )
 
 target_sources(GameServer

@@ -20,4 +20,14 @@ target_include_directories(GameServer PRIVATE
 
 target_link_libraries(GameServer PRIVATE spdlog::spdlog)
 
+
+# using this method to control the log level at compile time could achieve better performance.
+target_compile_definitions(GameServer PRIVATE
+    # for debug， SPDLOG_ACTIVE_LEVEL 为 TRACE
+    $<$<CONFIG:Debug>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE>
+
+    # for Release , use the default setting.
+    # $<$<CONFIG:Release>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_WARN>
+)
+
 # target_link_libraries(my_app PRIVATE fmt::fmt)

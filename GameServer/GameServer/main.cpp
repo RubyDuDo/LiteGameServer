@@ -30,6 +30,15 @@ void initLog()
 //    } catch (const spdlog::spdlog_ex &ex) {
 //       // 处理异常
 //    }
+    
+//    auto logger = spdlog::stdout_color_mt("console");
+//
+//        // 设置 pattern，包括 %@ 以打印 source location（文件名:行号）
+//        logger->set_pattern("[%@:%#-%!] [%l] %v");
+//
+//        // 使用 source_loc 显式传入源码信息
+//        spdlog::source_loc loc{__FILE_NAME__, __LINE__, SPDLOG_FUNCTION};
+//        logger->log(loc, spdlog::level::info, "Hello with source info");
 }
 
 int main(int argc, const char * argv[]) {
@@ -39,8 +48,6 @@ int main(int argc, const char * argv[]) {
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
     printf("Current working dir: %s\n", cwd);
-    
-    initLog();
     
     GameLoop game;
     m_pGame = &game;

@@ -10,6 +10,8 @@
 #include <thread>
 using namespace std;
 
+#include "Utils/LoggerHelper.hpp"
+
 #include "proto/msg.pb.h"
 using namespace MyGame;
 
@@ -19,10 +21,31 @@ const string DB_USER_DEF = "admin";
 const string DB_PASSWD_DEF = "111111";
 const string DB_NAME_DEF = "MyGame";
 
+const string LOG_TYPE_DEF = "basic";
+const string LOG_PATH_DEF = "logs/app_basic.log";
+
 constexpr string config_dir = "./config.ini";
 bool GameLoop::Init()
 {
     int res = m_config.ParseFile( config_dir );
+    
+    std::string logFileType = m_config.getString("Log", "type", LOG_TYPE_DEF);
+    std::string logFilePath = m_config.getString("Log", "path", LOG_PATH_DEF);
+    LogFileType logType = LogFileType::BASIC;
+    if( logFileType == "rotate")
+    {
+        logType = LogFileType::ROTATING;
+    }
+    else if( logFileType == "daily")
+    {
+        logType = LogFileType::DAILY;
+    }
+    else if( logFileType == "none")
+    {
+        logType = LogFileType::NONE;
+    }
+
+    LoggerHelper::setupLogger( "main_logger", true, logType, logFilePath, spdlog::level::debug, spdlog::level::info, true );
     
     unsigned short port = (unsigned short)m_config.getInt( "Network" , "port", SVR_PORT_DEF );
     
@@ -33,7 +56,7 @@ bool GameLoop::Init()
         INetworkMgr::getInstance()->registerHandler( this );
     }
     else{
-        cout<<"Init network fail"<<endl;
+        SPDLOG_ERROR("Init network failed!");
         return false;
     }
     
@@ -47,6 +70,7 @@ bool GameLoop::Init()
                                      std::placeholders::_1,
                                      std::placeholders::_2));
 
+    
     return ret;
 }
 
@@ -55,16 +79,15 @@ bool GameLoop::run()
     bool ret = Init();
     if( !ret )
     {
-        cout<<"Init Failed!"<<endl;
+        SPDLOG_ERROR("Init Failed!");
         return ret;
     }
     else{
-        cout<<"Init succeed!"<<endl;
+        SPDLOG_INFO("Init succeed!");
     }
     
     
-    
-    cout<<"Run ... "<<endl;
+    SPDLOG_INFO("Start Run!");
     
     while(true)
     {
@@ -72,7 +95,7 @@ bool GameLoop::run()
         update();
     }
     
-    //
+    SPDLOG_INFO("Stop Run!");
     return true;
 }
 
@@ -81,7 +104,7 @@ void GameLoop::onReceiveMsg( int fd, const std::string& msg )
     Msg packet;
     if( !packet.ParseFromString( msg ))
     {
-        cout<<"Parse head fail!"<<endl;
+        SPDLOG_WARN("Parse head fail!");
         return;
     }
     m_recvMsgs.push( make_pair( fd, packet ));
@@ -89,11 +112,13 @@ void GameLoop::onReceiveMsg( int fd, const std::string& msg )
 
 void GameLoop::onDisconnect( int fd )
 {
+    SPDLOG_INFO("onDisconnect fd:{}", fd );
     
 }
 
 void GameLoop::onConnect( const TcpSocket& sock )
 {
+    SPDLOG_INFO("onConnect fd:{}", sock.m_sock );
     
 }
 
@@ -133,11 +158,12 @@ void GameLoop::addDBQuery( const DBRequest& req, std::function<void( const DBRes
     int queryID = m_db.getNextID();
     m_db.addDBQuery( queryID, req );
     m_mapDBRspFuns[queryID] = func;
-    cout<<"addDBQuery:"<<req.head().type()<<endl;
+    SPDLOG_DEBUG("addDBQuery:{}", (int)req.head().type() );
 }
 
 void GameLoop::onReceiveDBRsp( int queryID,  const DBResponse& rsp )
 {
+    SPDLOG_DEBUG("onReceiveDBRsp:{0},{1}", (int)rsp.head().type(), queryID );
     m_dbmsgRsp.push( make_pair( queryID, rsp ) );
 }
 
@@ -176,7 +202,7 @@ void GameLoop::dealQueryAccount( int sockID, const string& strPasswd, const DBRe
     DBRspAccout query;
     if( !query.ParseFromString( rsp.payload()))
     {
-        cerr<<"DBRspQueryAccount parse Fail"<<endl;
+        SPDLOG_WARN("DBRspQueryAccount parse Fail");
         return;
     }
     
@@ -199,8 +225,7 @@ void GameLoop::dealQueryAccount( int sockID, const string& strPasswd, const DBRe
     else{
         if( strPasswd != query.passwd() )
         {
-            cout<<"Password mismatch!"<<strPasswd<<"_"<<query.passwd()<<endl;
-            //notify client fail
+            SPDLOG_INFO("Password mismatch! {}_{}", strPasswd, query.passwd());
             
             ResponseLogin outMsg;
             NetSendHelper::addTcpQueue( sockID, MsgType_Login, MsgErr_PasswdWrong, outMsg);
@@ -241,7 +266,7 @@ void GameLoop::dealAddRole( int sockID, const DBResponse& rsp )
     DBRspRole query;
     if( !query.ParseFromString( rsp.payload()))
     {
-        cerr<<"DBRspQueryAccount parse Fail"<<endl;
+        SPDLOG_WARN("DBRspQueryAccount parse Fail");
         return;
     }
     
@@ -272,7 +297,7 @@ void GameLoop::dealQueryRole( int sockID, const DBResponse& rsp  )
     DBRspRole query;
     if( !query.ParseFromString( rsp.payload()))
     {
-        cerr<<"DBRspQueryAccount parse Fail"<<endl;
+        SPDLOG_WARN("DBRspQueryAccount parse Fail");
         return;
     }
     
@@ -314,11 +339,11 @@ void GameLoop::dealLogin( int sockID, const Msg& msg )
     RequestLogin login;
     if( !msg.payload().UnpackTo( &login )  )
     {
-        cout<<"Parse Login fail"<<endl;
+        SPDLOG_WARN("Parse Login fail");
         return;
     }
     
-    cout<<"Login From:"<< login.strname()<<" _ "<<login.strpass()<<endl;
+    SPDLOG_INFO("Receive Login {} _ {}", login.strname(), login.strpass());
     
 //    m_playerMgr.onPlayerLogin( sockID, login.strname(), login.strpass() );
     DBRequest req;
@@ -342,14 +367,15 @@ void GameLoop::dealAction( int sockID, const Msg& msg )
     RequestAct act;
     if( !msg.payload().UnpackTo( &act ) )
     {
-        cout<<"Parse act fail"<<endl;
+        SPDLOG_WARN("Parse act fail");
         return;
     }
-    cout<<"Receive Act "<< act.action()<<endl;
+
+    SPDLOG_DEBUG("Receive Act {}", act.action());
     
     if( !m_playerMgr.isPlayerOnline( m_playerMgr.getPlayerIDFromSock( sockID ) ))
     {
-        cout<<"This player is not online"<<endl;
+        SPDLOG_WARN("This player is not online");
         return;
     }
     
@@ -366,10 +392,11 @@ void GameLoop::dealLogout( int sockID, const Msg& msg )
     RequestLogout logout;
     if( !msg.payload().UnpackTo( &logout ) )
     {
-        cout<<"Parse act fail"<<endl;
+        SPDLOG_WARN("Parse Logout fail");
         return;
     }
-    cout<<"Receive Logout "<< logout.roleid()<<"_ sock:"<<sockID <<endl;
+    
+    SPDLOG_INFO("Receive Logout {}, sock:{}", logout.roleid(), sockID );
     
     m_playerMgr.onPlayerLogout( sockID, logout.roleid() );
 }
@@ -379,5 +406,5 @@ GameLoop::~GameLoop()
     INetworkMgr::getInstance()->shutdownNetwork();
     // m_db.shutdown();
     
-    cout<<"GameLoop Shutdown!"<<endl;
+    SPDLOG_INFO("GameLoop Shutdown!");
 }
