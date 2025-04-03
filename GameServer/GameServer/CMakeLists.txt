@@ -115,35 +115,9 @@ source_group("proto" FILES
 get_target_property(TARGET_SOURCES GameServer SOURCES)
 message(STATUS "Sources for GameServer: ${TARGET_SOURCES}")
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")  # macOS
-    message(STATUS "Detected platform: macOS")
-    set( platform "mac" )
-    message(STATUS "Detected platform: ${platform}")
-    set(MYSQL_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../thirdlibs/${platform}/mysql-connector-c++)
 
-    target_link_libraries(GameServer
-        PRIVATE
-        ${MYSQL_ROOT}/lib64/libssl.dylib
-        ${MYSQL_ROOT}/lib64/libcrypto.dylib
-        ${MYSQL_ROOT}/lib64/libmysqlcppconn-static.a
-    )
 
-    set_target_properties(GameServer PROPERTIES
-        BUILD_RPATH  ${MYSQL_ROOT}/lib64
-    )
-
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    message(STATUS "Detected platform: Linux")
-    set( platform "linux" )
-    message(STATUS "Detected platform: ${platform}")
-
-    set(MYSQL_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../thirdlibs/${platform}/mysql-connector-c++)
-        
-    target_link_libraries(GameServer
-        PRIVATE
-        ${MYSQL_ROOT}/lib64/libmysqlcppconn.so.9.8.2.0
-    )
-
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     target_compile_definitions(GameServer
         PRIVATE
         -D__LINUX__
@@ -157,33 +131,28 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     source_group("Network" FILES
         Network/NetworkMgrEpoll.cpp
         Network/NetworkMgrEpoll.hpp
-)
-
-
-else()
-    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}")
+    )
 endif()
 
+# add dependencies
 include(FetchContent)
 set(FETCHCONTENT_BASE_DIR "${CMAKE_SOURCE_DIR}/../_deps/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_GENERATOR}")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(SetupProtobuf)
 include(SetupSqdlog)
-
+include(SetupMysqlCpp)
+# add dependencies end
 
 target_include_directories(GameServer
     PRIVATE
-    ${MYSQL_ROOT}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/proto
     ${CMAKE_CURRENT_SOURCE_DIR}/DataReader
     ${CMAKE_CURRENT_SOURCE_DIR}/DB
     ${CMAKE_CURRENT_SOURCE_DIR}/Player)
 
 
-target_link_libraries(GameServer
-    PRIVATE
-    resolv)
+
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set_target_properties(GameServer PROPERTIES
