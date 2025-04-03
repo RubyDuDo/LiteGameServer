@@ -65,11 +65,8 @@ bool GameLoop::Init()
     string passwd = m_config.getString("DB", "passwd", DB_PASSWD_DEF );
     string dbname = m_config.getString("DB", "dbname", DB_NAME_DEF );
     m_db.InitDB(host, user, passwd, dbname);
-    m_db.registerRspHandle(
-                           std::bind( &GameLoop::onReceiveDBRsp, this ,
-                                     std::placeholders::_1,
-                                     std::placeholders::_2));
-
+    m_db.registerQueryHandler( &m_dbQueryHandler);
+    m_db.registerResponseHandler( this );
     
     return ret;
 }
@@ -137,12 +134,12 @@ void GameLoop::update()
     while( itdb )
     {
         int queryID = itdb->first;
-        auto rsp = itdb->second;
+        auto& rsp = itdb->second;
         auto itCb = m_mapDBRspFuns.find( queryID );
         if( itCb != m_mapDBRspFuns.end())
         {
             auto callback = itCb->second;
-            callback( rsp );
+            callback( *rsp );
             
             m_mapDBRspFuns.erase( itCb );
         }
@@ -153,18 +150,19 @@ void GameLoop::update()
     //todo update gamelogic
 }
 
-void GameLoop::addDBQuery( const DBRequest& req, std::function<void( const DBResponse&)> func )
+void GameLoop::addDBQuery( std::unique_ptr<DBRequest>&& req, std::function<void( const DBResponse&)> func )
 {
+    SPDLOG_DEBUG("addDBQuery:{}", (int)req->head().type() );
     int queryID = m_db.getNextID();
-    m_db.addDBQuery( queryID, req );
+    m_db.addDBQuery( queryID, std::move(req) );
     m_mapDBRspFuns[queryID] = func;
-    SPDLOG_DEBUG("addDBQuery:{}", (int)req.head().type() );
+    
 }
 
-void GameLoop::onReceiveDBRsp( int queryID,  const DBResponse& rsp )
+void GameLoop::onReceiveDBRsp( int queryID, std::unique_ptr<DBResponse>&& rsp )
 {
-    SPDLOG_DEBUG("onReceiveDBRsp:{0},{1}", (int)rsp.head().type(), queryID );
-    m_dbmsgRsp.push( make_pair( queryID, rsp ) );
+    SPDLOG_DEBUG("onReceiveDBRsp:{0},{1}", (int)rsp->head().type(), queryID );
+    m_dbmsgRsp.push( make_pair( queryID, std::move(rsp) ) );
 }
 
 //void GameLoop::dealDBRsp( const DBResponse& rsp )
@@ -209,15 +207,15 @@ void GameLoop::dealQueryAccount( int sockID, const string& strPasswd, const DBRe
     if( query.roleid() == 0 )
     {
         //send message to db to create a new role for this account
-        DBRequest req;
-        req.mutable_head()->set_type( DBReqType_AddRole );
+        auto req = std::make_unique<DBRequest>();
+        req->mutable_head()->set_type( DBReqType_AddRole );
         
         DBReqAddRole addRole;
         addRole.set_name( query.account() );
 
-        req.set_payload( addRole.SerializeAsString() );
+        req->set_payload( addRole.SerializeAsString() );
         
-        addDBQuery( req , [sockID, this](const DBResponse& rsp ){
+        addDBQuery( std::move(req) , [sockID, this](const DBResponse& rsp ){
             dealAddRole( sockID ,  rsp );
         });
         
@@ -233,15 +231,15 @@ void GameLoop::dealQueryAccount( int sockID, const string& strPasswd, const DBRe
         }
     
         //send message to db to query role info
-        DBRequest req;
-        req.mutable_head()->set_type( DBReqType_QueryRole );
+        auto req = std::make_unique<DBRequest>();
+        req->mutable_head()->set_type( DBReqType_QueryRole );
         
         DBReqQueryRole queryRole;
         queryRole.set_roleid( query.roleid() );
 
-        req.set_payload( queryRole.SerializeAsString() );
+        req->set_payload( queryRole.SerializeAsString() );
         
-        addDBQuery( req , [sockID, this](const DBResponse& rsp ){
+        addDBQuery( std::move(req) , [sockID, this](const DBResponse& rsp ){
             dealQueryRole( sockID ,  rsp );
         });
         
@@ -346,20 +344,16 @@ void GameLoop::dealLogin( int sockID, const Msg& msg )
     SPDLOG_INFO("Receive Login {} _ {}", login.strname(), login.strpass());
     
 //    m_playerMgr.onPlayerLogin( sockID, login.strname(), login.strpass() );
-    DBRequest req;
-    req.mutable_head()->set_type( DBReqType_QueryAccount );
+    auto req = std::make_unique<DBRequest>();
+    req->mutable_head()->set_type( DBReqType_QueryAccount );
     DBReqQueryAccount account;
     account.set_account( login.strname() );
     string strData = account.SerializeAsString();
-    req.set_payload( strData );
+    req->set_payload( strData );
     
-    addDBQuery( req , [sockID, login, this](const DBResponse& rsp ){
+    addDBQuery( std::move(req) , [sockID, login, this](const DBResponse& rsp ){
         dealQueryAccount( sockID, login.strpass(),  rsp );
     });
-    
-    
-    
-    
 }
 
 void GameLoop::dealAction( int sockID, const Msg& msg )

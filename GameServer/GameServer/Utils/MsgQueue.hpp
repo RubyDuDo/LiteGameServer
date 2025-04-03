@@ -18,46 +18,42 @@ template <typename T>
 class MsgQueue
 {
 public:
-    void push( const T& value );
+    void push( T&& value );
     
-    shared_ptr<T> try_pop();
-    shared_ptr<T> wait_and_pop();
+    unique_ptr<T> try_pop();
+    unique_ptr<T> wait_and_pop();
     
     bool empty();
     int size();
     
 private:
-    std::queue<T> m_queue;
+    std::queue< T > m_queue;
     
     mutex m_mut;
     condition_variable m_cond;
     
-    
-    
-    
-    
 };
 
 template <typename T>
-void MsgQueue<T>::push( const T& value )
+void MsgQueue<T>::push(  T&& value )
 {
     {
         lock_guard lk(m_mut);
-        m_queue.push( value );
+        m_queue.push( std::move(value) );
     }
 
     m_cond.notify_one();
 }
 
 template <typename T>
-shared_ptr<T> MsgQueue<T>::try_pop()
+unique_ptr<T> MsgQueue<T>::try_pop()
 {
     lock_guard lk( m_mut );
     if( !m_queue.empty())
     {
-        auto data = m_queue.front();
+        auto data = std::move(m_queue.front());
         m_queue.pop();
-        return make_shared<T>( data );
+        return make_unique<T>( std::move(data) );
     }
     else{
         return nullptr;
@@ -66,13 +62,13 @@ shared_ptr<T> MsgQueue<T>::try_pop()
 }
 
 template <typename T>
-shared_ptr<T> MsgQueue<T>::wait_and_pop()
+unique_ptr<T> MsgQueue<T>::wait_and_pop()
 {
     unique_lock lk(m_mut);
     m_cond.wait( lk, [this]{ return !m_queue.empty();});
-    auto res( make_shared<T>( m_queue.front() ));
+    auto data = std::move(m_queue.front());
     m_queue.pop();
-    return res;
+    return make_unique<T>( std::move(data) );
 }
 
 template <typename T>

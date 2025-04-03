@@ -21,6 +21,8 @@ target_sources(GameServer
     main.cpp
     GameNetHelper.cpp 
     GameNetHelper.hpp
+    DBQueryHandler.cpp 
+    DBQueryHandler.hpp
 )
 source_group("Game" FILES
     GameLoop.cpp
@@ -28,6 +30,8 @@ source_group("Game" FILES
     main.cpp
     GameNetHelper.cpp 
     GameNetHelper.hpp
+    DBQueryHandler.cpp 
+    DBQueryHandler.hpp
 )
 
 target_sources(GameServer

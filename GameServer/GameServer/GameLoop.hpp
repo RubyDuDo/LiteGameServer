@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "Player/PlayerMgr.hpp"
 #include "DB/DBMgr.hpp"
+#include "DBQueryHandler.hpp"
 #include "proto/dbmsg.pb.h"
 #include "DataReader/INIReader.hpp"
 
@@ -19,7 +20,7 @@
 
 
 
-class GameLoop : public INetHandler
+class GameLoop : public INetHandler, public IDBResponseHandler
 {
 public:
     bool Init();
@@ -27,7 +28,7 @@ public:
     
     void update();
 
-    ~GameLoop();
+    virtual ~GameLoop();
     
 public:
     void onReceiveMsg( int sockID,const Msg& packet );
@@ -39,7 +40,7 @@ public:
     void dealLogout( int sockID, const Msg& packet );
     
 public:
-    void onReceiveDBRsp( int queryID, const DBResponse& rsp );
+    virtual void onReceiveDBRsp( int queryID, std::unique_ptr<DBResponse>&& rsp );
     
 //    void dealDBRsp( const DBResponse& rsp );
     void dealQueryAccount( int sockID, const string& strPasswd,  const DBResponse& rsp );
@@ -47,7 +48,7 @@ public:
     
     void dealQueryRole( int sockID, const DBResponse& rsp  );
     
-    void addDBQuery( const DBRequest& req, std::function<void( const DBResponse&)> func );
+    void addDBQuery( std::unique_ptr<DBRequest>&& req, std::function<void( const DBResponse&)> func );
     
 public:
     
@@ -58,15 +59,20 @@ public:
 private:
     int m_nextRoleID = 1;
     PlayerManager m_playerMgr;
+    
     DBMgr m_db;
+    DBQueryHandler m_dbQueryHandler;
+    
     INIReader m_config;
     
 
     MsgQueue< pair<int, Msg> > m_recvMsgs;
     
-    MsgQueue< pair<int, DBResponse>> m_dbmsgRsp;
+    MsgQueue< pair<int, std::unique_ptr<DBResponse> >> m_dbmsgRsp;
     
     map<int, std::function<void( const DBResponse&)> > m_mapDBRspFuns;
+    
+    
 };
 
 
