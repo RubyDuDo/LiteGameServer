@@ -1,4 +1,5 @@
 # config protobuf
+message("Configuring protobuf")
 set(protobuf_BUILD_SHARED_LIBS OFF)
 set(protobuf_INSTALL OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # 如果你需要支持 -fPIC

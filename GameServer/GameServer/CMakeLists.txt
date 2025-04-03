@@ -169,6 +169,7 @@ set(FETCHCONTENT_BASE_DIR "${CMAKE_SOURCE_DIR}/../_deps/${CMAKE_SYSTEM_NAME}-${C
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(SetupProtobuf)
+include(SetupSqdlog)
 
 
 target_include_directories(GameServer
