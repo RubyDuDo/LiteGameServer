@@ -71,13 +71,16 @@ bool INetworkMgr::initNetwork( unsigned short svr_port )
 
 void INetworkMgr::shutdownNetwork()
 {
-    innerShutdown();
-
     m_bRunning = false;
     if( m_runThread && m_runThread->joinable() )
     {
         m_runThread->join();
     }
+    
+    //clear all the resources should be done after the thread exit
+    //in order to avoid the resource is still in use
+    //also avoid the resources are used in multi threads
+    innerShutdown();
 }
 
 void INetworkMgr::registerHandler(INetHandler* handler)

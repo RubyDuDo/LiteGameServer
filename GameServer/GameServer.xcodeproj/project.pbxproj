@@ -42,6 +42,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Network/NetworkMgr.cpp,
+				Network/NetworkMgrEpoll.cpp,
 				proto/msg.proto,
 			);
 			target = BE04CA012D66F67D00492E0C /* GameServer */;
