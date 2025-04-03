@@ -31,9 +31,21 @@ It supports **macOS** and **linux** .
 
 
 ## Dependencies
-This project currently relies on two external libraries:
+This project currently relies on three external libraries:
 
 - `protobuf` (for serialization)
 - `mysql_connection` (for database access)
+- `spdlog` (for log system)
 
-mysql_connection are included in `./GameServer/thirdlibs`. Protobuf is managed using `fetch content` function in CMake, so it will be download during configuring. So if you download this project, it may need network and git to build the first time. 
+mysql_connection are included in `./GameServer/thirdlibs`. Protobuf and Spdlog are managed using `fetch content` function in CMake, so it will be download during configuring. So if you download this project, it may need network and git to build the first time. 
+
+
+## Running environment
+This project connect to local database, so you need create the database before running.
+
+There are two sql scripts to setup the database environments, which are both under `./GameServer/script` directory.
+
+- `db.sql` will create the database MyGame, and add two table to it. 
+- `createrole.sql` will add one account to db, name: `ruby`, password:`111`.
+
+However, you need to create the user and grant the authority to the user you create. And then, you need to change the `[DB]` configure in `config.ini`, which is under `./GameServer/bin`
