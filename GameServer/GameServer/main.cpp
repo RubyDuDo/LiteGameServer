@@ -14,6 +14,8 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 
+#include <csignal>
+
 GameLoop* m_pGame = nullptr;
 
 void initLog()
@@ -41,9 +43,42 @@ void initLog()
 //        logger->log(loc, spdlog::level::info, "Hello with source info");
 }
 
+void signalHandler(int signum) {
+//    const char *msg = "Received SIGHUP, reloading config...\n";
+//        write(STDOUT_FILENO, msg, strlen(msg));
+//    SPDLOG_INFO("Signal received!");
+    if( signum == SIGINT || signum == SIGTERM)
+    {
+        SPDLOG_INFO("Signal SIGINT/SIGTERM received!");
+        //gracefully shutdown
+        m_pGame->stop();
+    }
+    else if( signum == SIGHUP )
+    {
+        SPDLOG_INFO("Signal SIGHUP received!");
+        //hot reload configure
+        m_pGame->reloadConfigure();
+    }
+}
+
 int main(int argc, const char * argv[]) {
     // insert code here...
     std::cout << "Hello, World!\n";
+    
+    struct sigaction action;
+    action.sa_handler = signalHandler;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0; // !!! 重要：没有 SA_RESTART !!!
+
+    // 注册 SIGTERM 和 SIGINT
+    if (sigaction(SIGTERM, &action, NULL) == -1) {
+        perror("sigaction SIGTERM failed");
+        return 1;
+    }
+    if (sigaction(SIGINT, &action, NULL) == -1) {
+        perror("sigaction SIGINT failed");
+        return 1;
+    }
 
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));

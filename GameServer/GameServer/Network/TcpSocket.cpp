@@ -64,7 +64,11 @@ int NetUtil::Select( int maxFd, const std::vector<TcpSocketPtr>& inReadSet, std:
     fd_set* writePtr = FillSetFromVector( write, inReadSet );
     fd_set* exceptPtr = FillSetFromVector( except, inReadSet );
     
-    int ret = select(maxFd + 1 , readPtr, writePtr, exceptPtr, nullptr );
+    struct timeval timeout;
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 500000;
+    
+    int ret = select(maxFd + 1 , readPtr, writePtr, exceptPtr, &timeout );
     
     if( ret > 0  )
     {

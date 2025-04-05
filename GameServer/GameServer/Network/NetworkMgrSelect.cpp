@@ -6,6 +6,7 @@
 //
 
 #include "NetworkMgrSelect.hpp"
+#include "../Utils/LoggerHelper.hpp"
 #include <iostream>
 constexpr int RECV_BUFF = 1500;
 
@@ -58,7 +59,7 @@ void NetworkMgrSelect::dispatchSendMsg()
 
 void NetworkMgrSelect::innerRun()
 {
-    std::cout<<"network Thread( Select: Nonblock Mode) started!"<<std::endl;
+    SPDLOG_INFO("network Thread( Select: Nonblock Mode) started!");
     while( m_bRunning )
     {
         clearInvalidSock();
@@ -73,6 +74,8 @@ void NetworkMgrSelect::innerRun()
             perror("select error");
             break;
         }
+        
+//        SPDLOG_INFO("Select return !");
         
         if( !outReadSet.empty())
         {
@@ -119,6 +122,8 @@ void NetworkMgrSelect::innerRun()
             }
         }
     }
+    
+    SPDLOG_INFO("network Thread( Select: Nonblock Mode) exit!");
     
 }
 

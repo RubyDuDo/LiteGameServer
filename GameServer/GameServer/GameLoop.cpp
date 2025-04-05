@@ -68,7 +68,19 @@ bool GameLoop::Init()
     m_db.registerQueryHandler( &m_dbQueryHandler);
     m_db.registerResponseHandler( this );
     
+    m_bRunning = true;
+    
     return ret;
+}
+
+void GameLoop::stop()
+{
+    m_bRunning = false;
+}
+
+void GameLoop::reloadConfigure()
+{
+    //todo , reload configure
 }
 
 bool GameLoop::run()
@@ -86,13 +98,19 @@ bool GameLoop::run()
     
     SPDLOG_INFO("Start Run!");
     
-    while(true)
+    while( m_bRunning)
     {
         std::this_thread::sleep_for( 20ms );
         update();
     }
     
     SPDLOG_INFO("Stop Run!");
+    INetworkMgr::getInstance()->shutdownNetwork();
+    SPDLOG_INFO("Stop Run: shut Network End!");
+    m_db.shutdownDB();
+    
+    SPDLOG_INFO("Stop Run End!");
+    
     return true;
 }
 

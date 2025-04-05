@@ -27,6 +27,10 @@ public:
     bool run();
     
     void update();
+    
+    void stop();
+    
+    void reloadConfigure();
 
     virtual ~GameLoop();
     
@@ -71,6 +75,8 @@ private:
     MsgQueue< pair<int, std::unique_ptr<DBResponse> >> m_dbmsgRsp;
     
     map<int, std::function<void( const DBResponse&)> > m_mapDBRspFuns;
+    
+    std::atomic<bool> m_bRunning = false;
     
     
 };

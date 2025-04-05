@@ -29,6 +29,13 @@ void NetworkMgrEpoll::innerShutdown()
     }
 }
 
+void NetworkMgrEpoll::innerNotifyThreadExit()
+{
+    // use eventfd to notify the thread to wake up
+    // and offer a chance to exam m_bRunning flag
+    notifyThreadEvent();
+}
+
 bool NetworkMgrEpoll::innerInit()
 {
     m_epollFd = epoll_create1( EPOLL_CLOEXEC );
@@ -251,7 +258,7 @@ void NetworkMgrEpoll::onConnectInner( shared_ptr<TcpSocket> sock  )
     }
 }
 
-void NetworkMgrEpoll::innerSendMsg( int fd, const std::string& msg )
+void NetworkMgrEpoll::notifyThreadEvent()
 {
     uint64_t notification = 1;
     ssize_t ret = write( m_eventFd, &notification, sizeof(notification) );
@@ -268,6 +275,11 @@ void NetworkMgrEpoll::innerSendMsg( int fd, const std::string& msg )
     else{
         //success
     }
+}
+
+void NetworkMgrEpoll::innerSendMsg( int fd, const std::string& msg )
+{
+    notifyThreadEvent();
 }
 
 

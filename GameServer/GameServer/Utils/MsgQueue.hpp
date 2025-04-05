@@ -26,8 +26,12 @@ public:
     bool empty();
     int size();
     
+    //notify one waiting thread even if the queue is empty
+    //it's used when ask the wait thread to gracefully exit
+    void wake_waiters();
+    
 private:
-    std::queue< T > m_queue;
+    std::queue< std::unique_ptr<T> > m_queue;
     
     mutex m_mut;
     condition_variable m_cond;
@@ -39,9 +43,19 @@ void MsgQueue<T>::push(  T&& value )
 {
     {
         lock_guard lk(m_mut);
-        m_queue.push( std::move(value) );
+        m_queue.push( std::make_unique<T>(std::move(value)) );
     }
 
+    m_cond.notify_one();
+}
+
+template <typename T>
+void MsgQueue<T>::wake_waiters()
+{
+    {
+        lock_guard lk(m_mut);
+        m_queue.push( nullptr );
+    }
     m_cond.notify_one();
 }
 
@@ -53,7 +67,7 @@ unique_ptr<T> MsgQueue<T>::try_pop()
     {
         auto data = std::move(m_queue.front());
         m_queue.pop();
-        return make_unique<T>( std::move(data) );
+        return data;
     }
     else{
         return nullptr;
@@ -68,7 +82,7 @@ unique_ptr<T> MsgQueue<T>::wait_and_pop()
     m_cond.wait( lk, [this]{ return !m_queue.empty();});
     auto data = std::move(m_queue.front());
     m_queue.pop();
-    return make_unique<T>( std::move(data) );
+    return data;
 }
 
 template <typename T>

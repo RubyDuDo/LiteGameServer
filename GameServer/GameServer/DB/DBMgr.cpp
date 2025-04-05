@@ -119,13 +119,20 @@ bool DBMgr::InitDB( const std::string& url, const std::string& user,
 
 void DBMgr::shutdownDB()
 {
+    if( m_bRunning == false )
+    {
+        return;
+    }
+    
     SPDLOG_INFO(" Enter ");
     m_bRunning = false;
+    m_msgReq.wake_waiters();
     
     if( m_dbThread && m_dbThread->joinable())
     {
         m_dbThread->join();
     }
+    SPDLOG_INFO(" Exit ");
 }
 
 void DBMgr::addDBQuery( int queryID, std::unique_ptr<DBRequest>&& req )
@@ -138,6 +145,14 @@ void DBMgr::QueryThread()
     while(m_bRunning)
     {
         auto it = m_msgReq.wait_and_pop();
+        
+        //wait get a nullptr, it is a signal to exit
+        //let the decision to make by m_bRunning flag
+        if( it == nullptr )
+        {
+            continue;
+        }
+        
         if( m_queryHandler)
         {
             m_queryHandler->onQuery( it->first, std::move(it->second) );
