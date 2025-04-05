@@ -71,7 +71,7 @@ void NetworkMgrSelect::innerRun()
         int ret = NetUtil::Select( m_maxFd, m_setSocks, outReadSet, m_setSocks, outWriteSet, m_setSocks, outExceptSet);
         if( ret < 0 )
         {
-            perror("select error");
+            SPDLOG_ERROR("select error");
             break;
         }
         

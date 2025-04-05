@@ -14,6 +14,7 @@
 #include "../Utils/MsgQueue.hpp"
 #include "../proto/dbmsg.pb.h"
 #include "mysql/jdbc.h"
+#include <optional>
 using namespace MyGameDB;
 
 class IDBResponseHandler
