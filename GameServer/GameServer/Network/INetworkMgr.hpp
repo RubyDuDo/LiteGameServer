@@ -42,6 +42,9 @@ public:
     
     virtual ~INetworkMgr();
     
+private:
+    void notifyThreadExit();
+    virtual void innerNotifyThreadExit() {};
 protected:
     bool onReceiveMsg( std::shared_ptr<TcpSocket> sock );
     void onDisconnect( int fd );
@@ -51,6 +54,8 @@ private:
     virtual void onReceiveMsgInner( int fd, const std::string& msg ) = 0;
     virtual void onDisconnectInner( int fd ) = 0;
     virtual void onConnectInner( shared_ptr<TcpSocket> sock  ) = 0;
+
+    
     
 private:
     virtual bool innerInit() = 0;
