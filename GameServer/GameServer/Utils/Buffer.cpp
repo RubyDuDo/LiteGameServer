@@ -21,6 +21,11 @@ int Buffer::getSize()const
     return m_tail - m_head;
 }
 
+bool Buffer::isEmpty() const
+{
+    return getSize() == 0;
+}
+
 int Buffer::getAvailableSize() const
 {
     return m_maxSize - getSize();

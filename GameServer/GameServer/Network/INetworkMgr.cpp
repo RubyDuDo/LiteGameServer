@@ -8,7 +8,10 @@
 #include "INetworkMgr.hpp"
 #include <thread>
 #include <iostream>
-#include "NetworkMgrSelect.hpp"
+#ifdef __MACOS__
+#include "NetworkMgrKQueue.hpp"
+#endif
+
 #ifdef __LINUX__
 #include "NetworkMgrEpoll.hpp"
 #endif
@@ -37,8 +40,11 @@ std::unique_ptr<INetworkMgr> INetworkMgrFactory::createNetworkMgr()
 {
 #ifdef __LINUX__
     return make_unique<NetworkMgrEpoll>();
+#elif defined(__MACOS__)
+    return make_unique<NetworkMgrKqueue>();
 #else
-    return make_unique<NetworkMgrSelect>();
+    SPDLOG_ERROR("Not support this platform");
+    return nullptr;
 #endif
 }
 

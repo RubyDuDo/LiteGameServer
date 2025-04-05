@@ -61,8 +61,8 @@ target_sources(GameServer
     Network/INetworkMgr.hpp 
     Network/NetSlot.cpp 
     Network/NetSlot.hpp 
-    Network/NetworkMgrSelect.cpp 
-    Network/NetworkMgrSelect.hpp 
+    # Network/NetworkMgrSelect.cpp 
+    # Network/NetworkMgrSelect.hpp 
 )
 
 source_group("Network" FILES
@@ -72,8 +72,8 @@ source_group("Network" FILES
     Network/INetworkMgr.hpp 
     Network/NetSlot.cpp 
     Network/NetSlot.hpp 
-    Network/NetworkMgrSelect.cpp 
-    Network/NetworkMgrSelect.hpp 
+    # Network/NetworkMgrSelect.cpp 
+    # Network/NetworkMgrSelect.hpp 
 )
 
 target_sources(GameServer
@@ -124,8 +124,22 @@ get_target_property(TARGET_SOURCES GameServer SOURCES)
 message(STATUS "Sources for GameServer: ${TARGET_SOURCES}")
 
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")  # macOS
+    target_compile_definitions(GameServer
+    PRIVATE
+    -D__MACOS__
+    )
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    target_sources(GameServer
+    PRIVATE
+    Network/NetworkMgrKQueue.cpp 
+    Network/NetworkMgrKQueue.hpp)
+
+    source_group("Network" FILES
+    Network/NetworkMgrKQueue.cpp
+    Network/NetworkMgrKQueue.hpp
+    )
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     target_compile_definitions(GameServer
         PRIVATE
         -D__LINUX__
@@ -140,6 +154,8 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
         Network/NetworkMgrEpoll.cpp
         Network/NetworkMgrEpoll.hpp
     )
+else()
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
 # add dependencies

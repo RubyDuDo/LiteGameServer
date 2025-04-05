@@ -21,6 +21,7 @@ public:
     
     int getSize()const;
     int getAvailableSize() const;
+    bool isEmpty() const;
 private:
     void moveToStart();
 private:
