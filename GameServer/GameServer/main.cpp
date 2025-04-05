@@ -72,17 +72,17 @@ int main(int argc, const char * argv[]) {
 
     // 注册 SIGTERM 和 SIGINT
     if (sigaction(SIGTERM, &action, NULL) == -1) {
-        perror("sigaction SIGTERM failed");
+        SPDLOG_ERROR("sigaction SIGTERM failed");
         return 1;
     }
     if (sigaction(SIGINT, &action, NULL) == -1) {
-        perror("sigaction SIGINT failed");
+        SPDLOG_ERROR("sigaction SIGINT failed");
         return 1;
     }
 
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
-    printf("Current working dir: %s\n", cwd);
+    SPDLOG_INFO("Current working dir: %s\n", cwd);
     
     GameLoop game;
     m_pGame = &game;

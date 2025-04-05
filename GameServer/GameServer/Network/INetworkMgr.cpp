@@ -92,6 +92,11 @@ void INetworkMgr::notifyThreadExit()
 
 void INetworkMgr::shutdownNetwork()
 {
+    if( m_bRunning == false )
+    {
+        return;
+    }
+    
     notifyThreadExit();
     if( m_runThread && m_runThread->joinable() )
     {
@@ -102,6 +107,11 @@ void INetworkMgr::shutdownNetwork()
     //in order to avoid the resource is still in use
     //also avoid the resources are used in multi threads
     innerShutdown();
+
+    m_mapSocks.clear();
+    m_setSocks.clear();
+    m_mapSlot.clear();
+    m_listenSock.reset();
 }
 
 void INetworkMgr::registerHandler(INetHandler* handler)
@@ -128,8 +138,8 @@ INetworkMgr::~INetworkMgr()
 
 bool INetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock )
 {
-    auto it = m_mapSocks.find( sock->m_sock );
-    if( it == m_mapSocks.end() )
+    auto it = m_mapSlot.find( sock->m_sock );
+    if( it == m_mapSlot.end() )
     {
         SPDLOG_ERROR("onReceiveMsg, sock not found:{}", sock->m_sock);
         return false;

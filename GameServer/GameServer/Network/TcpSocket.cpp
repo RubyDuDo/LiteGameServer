@@ -16,13 +16,15 @@
 #include <iostream>
 #include <string>
 
+#include "../Utils/LoggerHelper.hpp"
+
 
 TcpSocketPtr NetUtil::createTcpSocket()
 {
     int sock = socket( AF_INET, SOCK_STREAM, 0);
     if( sock < 0 )
     {
-        perror("socket() error");
+        SPDLOG_ERROR("socket() error");
         return nullptr;
     }
     
@@ -64,11 +66,7 @@ int NetUtil::Select( int maxFd, const std::vector<TcpSocketPtr>& inReadSet, std:
     fd_set* writePtr = FillSetFromVector( write, inReadSet );
     fd_set* exceptPtr = FillSetFromVector( except, inReadSet );
     
-    struct timeval timeout;
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 500000;
-    
-    int ret = select(maxFd + 1 , readPtr, writePtr, exceptPtr, &timeout );
+    int ret = select(maxFd + 1 , readPtr, writePtr, exceptPtr, nullptr );
     
     if( ret > 0  )
     {
@@ -89,7 +87,7 @@ TcpSocket::TcpSocket( int sock ): m_sock( sock )
 
 TcpSocket::~TcpSocket()
 {
-    std::cout<<"~TcpSocket:"<< m_sock<<std::endl;
+    SPDLOG_DEBUG("~TcpSocket:{}", m_sock);
     close( m_sock );
 }
 
@@ -104,13 +102,7 @@ bool TcpSocket::isValid( )
 }
 
 int TcpSocket::Bind( unsigned short port )
-{
-    //set resueable, which will be more convenient when debug
-    int opt = 1;
-    if (setsockopt(m_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-        perror("setsockopt(SO_REUSEADDR) failed");
-    }
-    
+{   
     struct sockaddr_in addr{};
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -119,7 +111,7 @@ int TcpSocket::Bind( unsigned short port )
     int ret = bind( m_sock, (struct sockaddr*)&addr, sizeof(addr) );
     if( ret < 0 )
     {
-        perror("Bind Error");
+        SPDLOG_ERROR("Bind Error");
         return ret;
     }
     
@@ -132,7 +124,7 @@ int TcpSocket::Listen( int backlog )
     int ret = listen( m_sock, backlog );
     if( ret < 0 )
     {
-        perror("Listen Error!");
+        SPDLOG_ERROR("Listen Error!");
         return ret;
     }
     return 0;
@@ -149,7 +141,7 @@ std::shared_ptr<TcpSocket> TcpSocket::Accept()
         char ip_str[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &client_addr.sin_addr, ip_str, sizeof(ip_str));
         
-        std::cout<<"Connect from:"<<ip_str<<":"<<ntohs(client_addr.sin_port) << std::endl;
+        SPDLOG_DEBUG("Accept: {}:{}", ip_str, ntohs(client_addr.sin_port));
         return std::make_shared<TcpSocket>(sock);
     }
     else{
@@ -166,7 +158,7 @@ int TcpSocket::Connect( const std::string& ip, unsigned short port )
     int ret = connect( m_sock, (struct sockaddr*)&addr, sizeof(addr) );
     if( ret < 0 )
     {
-        perror( "Connect Error");
+        SPDLOG_ERROR( "Connect Error");
         return ret;
     }
     return 0;
@@ -177,7 +169,7 @@ int TcpSocket::SendData( const char* buff, int len )
     int ret = send( m_sock, buff, len, 0);
     if( ret == -1 )
     {
-        perror( "SendData Error");
+        SPDLOG_ERROR( "SendData Error");
     }
     
     return ret;
@@ -188,7 +180,7 @@ int TcpSocket::RecvData( char* buff, int maxLen )
     int ret = recv( m_sock, buff, maxLen, 0);
     if( ret == -1 )
     {
-        perror("RecvData Error");
+        SPDLOG_ERROR("RecvData Error");
     }
     return ret;
 }
@@ -209,7 +201,7 @@ int TcpSocket::setReuseAddr( bool bReuse )
     int ret = setsockopt( m_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) );
     if( ret < 0 )
     {
-        perror("setsockopt(SO_REUSEADDR) failed");
+        SPDLOG_ERROR("setsockopt(SO_REUSEADDR) failed");
     }
     
     return ret;

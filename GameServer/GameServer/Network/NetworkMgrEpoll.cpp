@@ -7,7 +7,10 @@
 #include <stdlib.h>    // For EXIT_FAILURE
 #include <iostream>
 
+#include "../Utils/LoggerHelper.hpp"
+
 constexpr int RECV_BUFF = 1500;
+const int MAX_EVENTS = 64;
 
     
 NetworkMgrEpoll::~NetworkMgrEpoll()
@@ -29,41 +32,34 @@ void NetworkMgrEpoll::innerShutdown()
     }
 }
 
-void NetworkMgrEpoll::innerNotifyThreadExit()
-{
-    // use eventfd to notify the thread to wake up
-    // and offer a chance to exam m_bRunning flag
-    notifyThreadEvent();
-}
-
 bool NetworkMgrEpoll::innerInit()
 {
     m_epollFd = epoll_create1( EPOLL_CLOEXEC );
     if (m_epollFd == -1) {
-        perror("epoll_create1");
+        SPDLOG_ERROR("epoll_create1 fail");
         return false;
     }
 
     m_eventFd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC );
     if (m_eventFd == -1) {
-        perror("eventfd");
+        SPDLOG_ERROR("eventfd create fail");
         return false;
     }
 
     struct epoll_event evListen;
     evListen.data.fd = m_listenSock->m_sock;
-    evListen.events = EPOLLIN | EPOLLET;
+    evListen.events = EPOLLIN ;
     if (epoll_ctl(m_epollFd, EPOLL_CTL_ADD, m_listenSock->m_sock, &evListen) == -1) {
-        perror("epoll_ctl: listen_sock");
+        SPDLOG_ERROR("epoll_ctl: listen_sock");
         return false;
     }
 
     struct epoll_event evEvent;
     evEvent.data.fd = m_eventFd;
-    evEvent.events = EPOLLIN | EPOLLET;
+    evEvent.events = EPOLLIN ;
     if( epoll_ctl(m_epollFd, EPOLL_CTL_ADD, m_eventFd, &evEvent) == -1 )
     {
-        perror("epoll_ctl: event_fd");
+        SPDLOG_ERROR("epoll_ctl: event_fd");
         return false;
     }
 
@@ -72,14 +68,16 @@ bool NetworkMgrEpoll::innerInit()
 
 void NetworkMgrEpoll::innerRun()
 {
-    std::cout<<"network Thread( Epoll: Nonblock Mode) started!"<<std::endl;
+    SPDLOG_INFO("Enter");
+    
+    std::vector<struct epoll_event> events(MAX_EVENTS);
     while( m_bRunning )
     {
-        const int MAX_EVENTS = 10;
-        std::vector<struct epoll_event> events(MAX_EVENTS);
+        
+        events.clear();
         int nfds = epoll_wait(m_epollFd, events.data(), MAX_EVENTS, -1);
         if (nfds == -1) {
-            perror("epoll_wait");
+            SPDLOG_ERROR("epoll_wait");
 
             if( errno == EINTR )
             {
@@ -98,13 +96,19 @@ void NetworkMgrEpoll::innerRun()
             int fd = events[n].data.fd;
             if (fd == m_listenSock->m_sock) {
                 // Handle new connection
-                auto newSock = m_listenSock->Accept();
-                if (!newSock) {
-                    perror("Accept Error");
-                    continue;
+                while (true)
+                {
+                    /* code */
+                    auto newSock = m_listenSock->Accept();
+                    if (!newSock) {
+                        SPDLOG_ERROR("Accept Error");
+                        continue;
+                    }
+                
+                    onConnect( newSock );
                 }
-            
-                onConnect( newSock );
+                
+
                 
 
             } else if (fd == m_eventFd) {
@@ -112,7 +116,7 @@ void NetworkMgrEpoll::innerRun()
                 uint64_t notification;
                 ssize_t s = read(m_eventFd, &notification, sizeof(notification));
                 if (s != sizeof(notification)) {
-                    perror("read");
+                    SPDLOG_ERROR("read");
                     continue;
                 }
                 else{
@@ -163,8 +167,14 @@ void NetworkMgrEpoll::onSockEvent( const struct epoll_event& ev )
 
 void NetworkMgrEpoll::handleSendMsg( TcpSocket& sock )
 {
-    cout<<"handleSendMsg:"<<sock.m_sock<<endl;
-    NetSlot& slot = m_mapSlot[ sock.m_sock];
+    SPDLOG_DEBUG("handleSendMsg:{}", sock.m_sock);
+    auto it = m_mapSlot.find( sock.m_sock );
+    if( it == m_mapSlot.end() )
+    {
+        SPDLOG_DEBUG("onReceiveMsg, sock not found:{}", sock.m_sock);
+        return ;
+    }
+    NetSlot& slot = it->second;
 
     char buff[RECV_BUFF] = {};
     int sendSize = slot.m_sendBuff.getData(buff, RECV_BUFF);
@@ -187,9 +197,9 @@ void NetworkMgrEpoll::handleSendMsg( TcpSocket& sock )
         // No more data to send, remove EPOLLOUT
         struct epoll_event ev;
         ev.data.fd = sock.m_sock;
-        ev.events = EPOLLIN | EPOLLET ;
+        ev.events = EPOLLIN  ;
         if (epoll_ctl(m_epollFd, EPOLL_CTL_MOD, sock.m_sock, &ev) == -1) {
-            perror("epoll_ctl: fd");
+            SPDLOG_ERROR("epoll_ctl: fd");
         }
     }
 
@@ -197,7 +207,6 @@ void NetworkMgrEpoll::handleSendMsg( TcpSocket& sock )
 
 void NetworkMgrEpoll::onNewSendMsg()
 {
-    cout<<"onNewSendMsg:"<<endl;
     while( true )
     {
         auto it = m_msgQueue.try_pop();
@@ -206,20 +215,20 @@ void NetworkMgrEpoll::onNewSendMsg()
             auto itSlot = m_mapSlot.find( it->first );
             if( itSlot == m_mapSlot.end() )
             {
-                std::cout<<"sendMsg: slot not found:"<<it->first<<std::endl;
+                SPDLOG_ERROR("sendMsg: slot not found:{}", it->first);
                 continue;
             }
 
-            cout<<"sendMsg:"<<it->first<<":"<<it->second.size()<<endl;
+            SPDLOG_TRACE("sendMsg: sock:{}, size:{}", it->first, it->second.size());
 
             NetSlot& slot = itSlot->second;
             slot.sendMsg( it->second );
 
             struct epoll_event ev;
             ev.data.fd = it->first;
-            ev.events = EPOLLIN | EPOLLET | EPOLLOUT;
+            ev.events = EPOLLIN  | EPOLLOUT;
             if (epoll_ctl(m_epollFd, EPOLL_CTL_MOD, it->first, &ev) == -1) {
-                perror("epoll_ctl: fd");
+                SPDLOG_ERROR("epoll_ctl: fd");
                 continue;
             }
         }
@@ -231,8 +240,6 @@ void NetworkMgrEpoll::onNewSendMsg()
 
 void NetworkMgrEpoll::onReceiveMsgInner( int fd, const std::string& msg )
 {
-    cout<<"onReceiveMsg:"<<fd<<endl;
-
 }
 
 void NetworkMgrEpoll::onDisconnectInner( int fd )
@@ -242,7 +249,7 @@ void NetworkMgrEpoll::onDisconnectInner( int fd )
 
     if( epoll_ctl( m_epollFd, EPOLL_CTL_DEL, fd, &ev ) == -1 )
     {
-        perror("epoll_ctl: fd");
+        SPDLOG_ERROR("epoll_ctl: fd");
         return;
     }
 
@@ -251,25 +258,30 @@ void NetworkMgrEpoll::onConnectInner( shared_ptr<TcpSocket> sock  )
 {
     struct epoll_event ev;
     ev.data.fd = sock->m_sock;
-    ev.events = EPOLLIN | EPOLLET ;
+    ev.events = EPOLLIN  ;
     if (epoll_ctl(m_epollFd, EPOLL_CTL_ADD, sock->m_sock, &ev) == -1) {
-        perror("epoll_ctl: fd");
+        SPDLOG_ERROR("epoll_ctl: fd");
         return;
     }
 }
 
-void NetworkMgrEpoll::notifyThreadEvent()
+void NetworkMgrEpoll::innerSendMsg( int fd, const std::string& msg )
+{
+    notifyThread();
+}
+
+void NetworkMgrEpoll::notifyThread()
 {
     uint64_t notification = 1;
     ssize_t ret = write( m_eventFd, &notification, sizeof(notification) );
     if( ret < 0 )
     {
-        perror("innerSendMsg");
+        SPDLOG_ERROR("write err: {}", strerror(errno));
         return;
     }
     else if( ret != sizeof(notification) )
     {
-        perror("innerSendMsg");
+        SPDLOG_ERROR("write err: {}", strerror(errno));
         return;
     }
     else{
@@ -277,9 +289,8 @@ void NetworkMgrEpoll::notifyThreadEvent()
     }
 }
 
-void NetworkMgrEpoll::innerSendMsg( int fd, const std::string& msg )
-{
-    notifyThreadEvent();
+void NetworkMgrEpoll::innerNotifyThreadExit(){
+    notifyThread();
 }
 
 

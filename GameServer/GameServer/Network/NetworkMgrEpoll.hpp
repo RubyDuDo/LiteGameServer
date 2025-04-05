@@ -16,7 +16,7 @@ public:
     
 private:
     virtual void innerShutdown() ;
-    virtual void innerNotifyThreadExit() {};
+    virtual void innerNotifyThreadExit() ;
 
     virtual bool innerInit();
     virtual void innerRun();
