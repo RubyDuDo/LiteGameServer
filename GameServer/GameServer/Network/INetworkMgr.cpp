@@ -18,6 +18,7 @@ using namespace std;
 
 #include <cerrno>
 #include <cstring>
+#include "../Utils/LoggerHelper.hpp"
 
 constexpr int RECV_BUFF = 1500;
 
@@ -46,18 +47,32 @@ std::unique_ptr<INetworkMgr> INetworkMgrFactory::createNetworkMgr()
 bool INetworkMgr::initNetwork( unsigned short svr_port )
 {
     m_listenSock = NetUtil::createTcpSocket();
+    if( m_listenSock == nullptr )
+    {
+        SPDLOG_ERROR("createTcpSocket fail");
+        return false;
+    }
     m_listenSock->setReuseAddr(true);
-    cout<<"setReuseAddr"<<endl;
     m_listenSock->setNonBlock( true );
     
-    m_listenSock->Bind( svr_port );
+    int ret = m_listenSock->Bind( svr_port );
+    if( ret < 0 )
+    {
+        SPDLOG_ERROR("Bind Error");
+        return false;
+    }
     
-    m_listenSock->Listen();
+    ret = m_listenSock->Listen();
+    if( ret < 0 )
+    {
+        SPDLOG_ERROR("Listen Error!");
+        return false;
+    }
     
     bool bRet = innerInit();
     if( bRet == false )
     {
-        cout<<"init network fail!"<<endl;
+        SPDLOG_ERROR("innerInit network fail!");
         return false;
     }
 
@@ -95,7 +110,7 @@ void INetworkMgr::networkThread()
 
 void INetworkMgr::sendMsg( int fd, const std::string& msg )
 {
-    cout<<"sendMsg:"<<fd<<":"<<msg.size()<<endl;
+    SPDLOG_TRACE("sendMsg: fd:{}, size:{}", fd, msg.size());
     m_msgQueue.push( make_pair( fd, msg ));
     innerSendMsg( fd, msg );
 }
@@ -107,12 +122,17 @@ INetworkMgr::~INetworkMgr()
 
 bool INetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock )
 {
-    cout<<"onReceiveMsg:"<<sock->m_sock<<endl;
-    NetSlot& slot = m_mapSlot[sock->m_sock];
+    auto it = m_mapSocks.find( sock->m_sock );
+    if( it == m_mapSocks.end() )
+    {
+        SPDLOG_ERROR("onReceiveMsg, sock not found:{}", sock->m_sock);
+        return false;
+    }
+    NetSlot& slot = it->second;
     //do receive
     char buff[RECV_BUFF]{};
     int ret = sock->RecvData( buff, RECV_BUFF );
-    cout<<"receiveData:"<<ret<<": from :"<<sock->m_sock<<endl;
+    SPDLOG_TRACE("receiveData: ret_{}, fd_{}", ret, sock->m_sock);
     bool bClose = false;
     while( true )
     {
@@ -131,13 +151,13 @@ bool INetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock )
             {
                 //client close
                 bClose = true;
-                cout<<"client close:"<<sock->m_sock<<endl;
+                SPDLOG_DEBUG("client close:{}", sock->m_sock);
             }
             else
             {
                 //error
                 bClose = true;
-                cout<<"recv error:"<<strerror(err)<<endl;
+                SPDLOG_DEBUG("recv error:{}", strerror(err));
             }
             //error
             break;
@@ -162,8 +182,6 @@ bool INetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock )
         }
     }
 
-    cout<<"onReceiveMsg, Send to Slot:"<<sock->m_sock<<endl;
-
     do{
         auto pMsg = slot.getNextRecvMsg();
         if( pMsg )
@@ -180,8 +198,6 @@ bool INetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock )
         }
     }while( true );
 
-    cout<<"onReceiveMsg, End:"<<sock->m_sock<<endl;
-
     if( bClose )
     {
         onDisconnect( sock->m_sock );
@@ -192,11 +208,12 @@ bool INetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock )
 
 void INetworkMgr::onDisconnect( int fd )
 {
-    cout<<"onDisconnect:"<<fd<<endl;
     if( m_mapSocks.find( fd ) == m_mapSocks.end() )
     {
         return;
     }
+
+    SPDLOG_DEBUG("onDisconnect:{}", fd);
 
     onDisconnectInner(fd);
 
@@ -219,7 +236,7 @@ void INetworkMgr::onDisconnect( int fd )
 
 void INetworkMgr::onConnect( shared_ptr<TcpSocket> sock )
 {
-    cout<<"onConnect:"<<sock->m_sock<<endl;
+    SPDLOG_DEBUG("onConnect:{}", sock->m_sock);
     sock->setNonBlock( true );
     m_mapSocks[sock->m_sock] = sock;
     m_mapSlot[ sock->m_sock ] = NetSlot();
