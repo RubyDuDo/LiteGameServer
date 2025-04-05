@@ -16,6 +16,8 @@ public:
     
 private:
     virtual void innerShutdown() ;
+    virtual void innerNotifyThreadExit() {};
+
     virtual bool innerInit();
     virtual void innerRun();
     
@@ -30,6 +32,8 @@ private:
     void onSockEvent( const struct epoll_event& ev );
 
     void handleSendMsg( TcpSocket& sock );
+
+    void notifyThread();
     
     
 private:

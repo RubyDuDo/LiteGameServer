@@ -84,9 +84,15 @@ bool INetworkMgr::initNetwork( unsigned short svr_port )
     
 }
 
-void INetworkMgr::shutdownNetwork()
+void INetworkMgr::notifyThreadExit()
 {
     m_bRunning = false;
+    innerNotifyThreadExit();
+}
+
+void INetworkMgr::shutdownNetwork()
+{
+    notifyThreadExit();
     if( m_runThread && m_runThread->joinable() )
     {
         m_runThread->join();
