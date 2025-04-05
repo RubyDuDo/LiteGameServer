@@ -9,6 +9,7 @@
 #define GameLoop_hpp
 
 #include <stdio.h>
+#include <chrono>
 #include "Player/PlayerMgr.hpp"
 #include "DB/DBMgr.hpp"
 #include "DBQueryHandler.hpp"
@@ -17,7 +18,7 @@
 
 #include "Network/INetworkMgr.hpp"
 #include "GameNetHelper.hpp"
-
+using TimePoint = std::chrono::steady_clock::time_point;
 
 
 class GameLoop : public INetHandler, public IDBResponseHandler
@@ -26,7 +27,7 @@ public:
     bool Init();
     bool run();
     
-    void update();
+    void update( const TimePoint& now);
     
     void stop();
     

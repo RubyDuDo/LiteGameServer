@@ -9,6 +9,7 @@
 #include <iostream>
 #include <thread>
 using namespace std;
+using namespace std::chrono;
 
 #include "Utils/LoggerHelper.hpp"
 
@@ -97,11 +98,15 @@ bool GameLoop::run()
     
     
     SPDLOG_INFO("Start Run!");
+    auto step = milliseconds( 20 );
     
     while( m_bRunning)
     {
-        std::this_thread::sleep_for( 20ms );
-        update();
+        auto now = steady_clock::now();
+        update( now );
+        auto next = now + step ;
+        std::this_thread::sleep_until( next );
+        
     }
     
     SPDLOG_INFO("Stop Run!");
@@ -137,8 +142,9 @@ void GameLoop::onConnect( const TcpSocket& sock )
     
 }
 
-void GameLoop::update()
+void GameLoop::update( const TimePoint& now)
 {
+    
     //deal network msg
     auto itMsg = m_recvMsgs.try_pop();
     while( itMsg )
