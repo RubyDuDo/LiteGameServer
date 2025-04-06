@@ -21,6 +21,10 @@
 - [Logging \& Metrics](#logging--metrics)
   - [Log System](#log-system)
   - [Statistic Event Log](#statistic-event-log)
+    - [Storage Options](#storage-options)
+    - [Event Log Format](#event-log-format)
+    - [Common Info to Include](#common-info-to-include)
+    - [How to Add a Event Log Type](#how-to-add-a-event-logtype)
 - [Test](#test)
   - [Unit Tests](#unit-tests)
   - [Integration Tests](#integration-tests)
@@ -87,8 +91,70 @@ I don't want to manage my own serialization, and the benefits of supporting mult
 # Logging & Metrics
 ## Log System
 ## Statistic Event Log
+**Files**: `EventLog`
+
+This module is used for collecting data for statistic analysis. It could include online data, system performance data, or other events infomation like login, logout, enter room and spend money.
+
+### Storage Options
+Usually, statistic log have three options:
+**Write to file**
+This is quite efficient. However, you need more work to process the data because it has no structure and type information.
+
+**Write to DB**
+Relational database or NoSQL database. Using this method will be more time-consuming and put some stress on db.
+
+**Send to network**
+The receiver uses a db/file to record the logs. It's also efficient, but it adds complexity as you need to add network communication and a receiver.
+
+In this project, we choose logging into files, as its both simple and efficient. How to deal with the event log files is out of the scope of this project. However, there are some agents to collection event log from files with low delay, so we can leave this part to consider later.
+
+Our log system is used to write backend logs to files.
+
+All the event log types will be written to a single file, as it's more convenient to trace the sequence of events, and you can simply split these events by grep event type.
+
+### Event Log Format
+About the log format, there are two options.
+For example: a login event contain roleID = 1, time = 135
+
+- Raw Content:
+  
+    `1,135`
+
+    Content using this method is quite efficient as the message is short. However, it's hard to read and it rely heavily on the order which may cause problems.
+
+- Structured content(json):
+`{roleID=1,time=135}`
+
+    Using this method, the data can explain itself, and support nested data, the shortage is the message is much longer.
+
+In our project, we choose json as our log format.
+
+### Common Info to Include
+
+There are some information that are included in most event types:
+
+`EventType`: As we put all events in a single file, it's necessary.
+
+`time`: When the event happen.
+
+`ret`: Error Code (0)-success, (other)-error reason. 
+
+`roleID`: 
 
 
+
+### How to Add a Event Log Type
+
+Just add a member function to EventLogs
+
+```c++
+void onEventLogin( int ret, int roleID );
+```
+Then ,you can invoke it:
+
+```c++
+EventLogs::getInstance()->onEventLogin( MsgErr_OK, query.roleid());
+```
 # Test
 ## Unit Tests
 ## Integration Tests
