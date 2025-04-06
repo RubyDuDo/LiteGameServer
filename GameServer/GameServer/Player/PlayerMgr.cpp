@@ -7,6 +7,7 @@
 
 #include "PlayerMgr.hpp"
 #include "../GameNetHelper.hpp"
+#include "../EventLogs.hpp"
 
 #include <iostream>
 using namespace std;
@@ -105,6 +106,7 @@ void PlayerManager::onPlayerLogout( int sockID, int roleID )
     rsp.set_roleid( roleID );
     
     NetSendHelper::addTcpQueue( sockID,MsgType_Logout, MsgErr_OK,  rsp);
+    EventLogs::getInstance()->onEventLogout( MsgErr_OK, roleID );
 }
 
 bool PlayerManager::isPlayerOnline( int roleID )

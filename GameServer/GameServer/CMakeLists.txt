@@ -23,6 +23,8 @@ target_sources(GameServer
     GameNetHelper.hpp
     DBQueryHandler.cpp 
     DBQueryHandler.hpp
+    EventLogs.cpp 
+    EventLogs.hpp
 )
 source_group("Game" FILES
     GameLoop.cpp
@@ -32,6 +34,8 @@ source_group("Game" FILES
     GameNetHelper.hpp
     DBQueryHandler.cpp 
     DBQueryHandler.hpp
+    EventLogs.cpp 
+    EventLogs.hpp
 )
 
 target_sources(GameServer
@@ -42,6 +46,7 @@ target_sources(GameServer
     Utils/MsgQueue.hpp 
     Utils/LoggerHelper.cpp 
     Utils/LoggerHelper.hpp
+    Utils/json.hpp
 )
 
 source_group("Utils" FILES
@@ -51,6 +56,7 @@ source_group("Utils" FILES
     Utils/MsgQueue.hpp 
     Utils/LoggerHelper.cpp 
     Utils/LoggerHelper.hpp
+    Utils/json.hpp
 )
 
 target_sources(GameServer

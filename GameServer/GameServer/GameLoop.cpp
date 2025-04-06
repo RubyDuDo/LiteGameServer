@@ -12,6 +12,7 @@ using namespace std;
 using namespace std::chrono;
 
 #include "Utils/LoggerHelper.hpp"
+#include "EventLogs.hpp"
 
 #include "proto/msg.pb.h"
 using namespace MyGame;
@@ -47,6 +48,8 @@ bool GameLoop::Init()
     }
 
     LoggerHelper::setupLogger( "main_logger", true, logType, logFilePath, spdlog::level::debug, spdlog::level::info, true );
+    
+    EventLogs::getInstance()->initEventLogs();
     
     unsigned short port = (unsigned short)m_config.getInt( "Network" , "port", SVR_PORT_DEF );
     
@@ -299,7 +302,7 @@ void GameLoop::dealAddRole( int sockID, const DBResponse& rsp )
     rspLogin.set_rolelevel( query.level() );
     NetSendHelper::addTcpQueue( sockID, MsgType_Login, MsgErr_OK, rspLogin);
     
-    
+    EventLogs::getInstance()->onEventLogin( MsgErr_OK, query.roleid());
     
 }
 
@@ -329,6 +332,8 @@ void GameLoop::dealQueryRole( int sockID, const DBResponse& rsp  )
     rspLogin.set_roleid( query.roleid() );
     rspLogin.set_rolelevel( query.level() );
     NetSendHelper::addTcpQueue( sockID, MsgType_Login, MsgErr_OK, rspLogin);
+    
+    EventLogs::getInstance()->onEventLogin(MsgErr_OK,  query.roleid());
     
 }
 
