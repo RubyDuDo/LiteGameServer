@@ -14,6 +14,8 @@ using namespace std::chrono;
 #include "Utils/LoggerHelper.hpp"
 #include "EventLogs.hpp"
 
+#include "Game/DataMgr/DataMgr.hpp"
+
 #include "proto/msg.pb.h"
 using namespace MyGame;
 
@@ -48,6 +50,13 @@ bool GameLoop::Init()
     }
 
     LoggerHelper::setupLogger( "main_logger", true, logType, logFilePath, spdlog::level::debug, spdlog::level::info, true );
+    
+    DataMgr::getInstance()->initData();
+    auto moster = DataMgr::getInstance()->getData<MonsterInfo>( 1 );
+    if( moster )
+    {
+        SPDLOG_INFO("test:Monster ID: {}, Name: {}", moster->getID(), moster->name );
+    }
     
     EventLogs::getInstance()->initEventLogs();
     

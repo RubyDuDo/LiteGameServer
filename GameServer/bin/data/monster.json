@@ -1,0 +1,16 @@
+[
+    {
+        "MonsterID": 1,
+        "HP": 10,
+        "Level": 3,
+        "name": "Gost",
+        "Res": "../resouce/Gost.png"
+    },
+    {
+        "MonsterID": 2,
+        "HP": 20,
+        "Level": 5,
+        "name": "Mud",
+        "Res": "../resouce/Mud.png"
+    }
+]

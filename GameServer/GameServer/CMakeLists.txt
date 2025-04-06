@@ -40,6 +40,21 @@ source_group("Game" FILES
 
 target_sources(GameServer
     PRIVATE
+    Game/DataMgr/DataDefine.cpp 
+    Game/DataMgr/DataDefine.hpp
+    Game/DataMgr/DataMgr.cpp
+    Game/DataMgr/DataMgr.hpp
+)
+
+source_group( "Game\\DataMgr" FILES
+    Game/DataMgr/DataDefine.cpp 
+    Game/DataMgr/DataDefine.hpp
+    Game/DataMgr/DataMgr.cpp
+    Game/DataMgr/DataMgr.hpp
+)
+
+target_sources(GameServer
+    PRIVATE
     Utils/Buffer.hpp
     Utils/Buffer.cpp
     Utils/MsgQueue.cpp 
