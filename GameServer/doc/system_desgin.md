@@ -1,4 +1,45 @@
+<!-- toc -->
+- [System Overview](#system-overview)
+  - [System Structure](#system-structure)
+  - [Threads](#threads)
+  - [Module and Directory](#module-and-directory)
+- [Network](#network)
+  - [Introduction](#introduction)
+  - [Three Layers](#three-layers)
+  - [EPOLL Mode](#epoll-mode)
+- [Database](#database)
+- [Build System (CMake)](#build-system-cmake)
+- [Configuration](#configuration)
+  - [Game Config](#game-config)
+  - [Server Config](#server-config)
+  - [Data Hot Reload](#data-hot-reload)
+- [Online State Management](#online-state-management)
+- [Role ID Generation](#role-id-generation)
+- [Gracefully Exit](#gracefully-exit)
+  - [Trigger: Singal Handle](#trigger-singal-handle)
+  - [Exit Waiting thread](#exit-waiting-thread)
+- [Logging \& Metrics](#logging--metrics)
+  - [Log System](#log-system)
+  - [Statistic Event Log](#statistic-event-log)
+- [Test](#test)
+  - [Unit Tests](#unit-tests)
+  - [Integration Tests](#integration-tests)
+- [Deployment \& Operations](#deployment--operations)
+  - [Run Scripts](#run-scripts)
+  - [CI/CD Pipeline](#cicd-pipeline)
+- [Utils](#utils)
+  - [Memory Pool](#memory-pool)
+
+<!-- /toc -->
+
+# System Overview
+## System Structure
+## Threads
+## Module and Directory
 # Network
+## Introduction
+
+
 ## Three Layers
 
 For a game server, network functionality is one of the essential features, so it was the first component I added to my LiteGameServer. In a game server, the network functionality is usually divided into three layers:
@@ -12,7 +53,7 @@ TCP is widely used for client connections. In LiteGameServer, I also chose to su
 **Application Protocol Layer**  
 After receiving a message, it's time to interpret its contents, which means determining the application protocol. There are three common ways to encode a message:
 
-**Text Format (e.g., JSON):**  
+***Text Format (e.g., JSON):***  
 It is simple and easy to read; since it is just text, you do not have to worry about byte order issues. However, text-based messages are typically longer than their binary counterparts, consuming more bandwidth. Moreover, they are easier to intercept, making them less secure.
 
 **Custom Message Types with Serialization and Deserialization:**  
@@ -22,3 +63,44 @@ This approach is safe and efficient, and since you have complete control over th
 Third-party serialization libraries like Protobuf are robust and efficient; moreover, they offer advanced features, such as optional fields, which are quite useful for sophisticated applications. Additionally, they support multiple programming languages. For example, if your client is written in C# (Unity) and your game server in C++, it is very convenient. All you need to do is write a configuration file and use the provided tools to generate code for different languages. The drawback is that it introduces a dependency on an external project, which increases the overall complexity of your project.
 
 I don't want to manage my own serialization, and the benefits of supporting multiple languages and version updates with Protobuf are quite appealing, so I chose to use Protobuf in this project.
+## EPOLL Mode
+
+# Database
+
+# Build System (CMake)
+
+# Configuration
+## Game Config
+
+## Server Config
+
+## Data Hot Reload
+
+# Online State Management
+
+# Role ID Generation
+
+# Gracefully Exit
+## Trigger: Singal Handle
+## Exit Waiting thread
+
+# Logging & Metrics
+## Log System
+## Statistic Event Log
+
+
+# Test
+## Unit Tests
+## Integration Tests
+
+# Deployment & Operations
+## Run Scripts
+## CI/CD Pipeline
+
+# Utils
+## Memory Pool
+
+
+
+
+
