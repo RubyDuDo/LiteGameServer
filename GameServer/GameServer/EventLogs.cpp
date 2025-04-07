@@ -49,6 +49,9 @@ void EventLogs::initLoggers( const std::string& logName,
             spdlog::level::level_enum::info,
             false);
         
+        std::string file_pattern = "%v";
+        logger->set_pattern(file_pattern);
+        
     } catch (const spdlog::spdlog_ex& ex) {
         std::cerr << "Event Log initialization failed for logger '" << logName << "': " << ex.what() << std::endl;
         // Can optionally remove the logger that might have been partially registered
