@@ -74,13 +74,15 @@ INIReader::INIReader()
 }
 
 
-std::string trim(const std::string& str) {
+std::string trim( std::string& str) {
     auto begin = std::find_if_not(str.begin(), str.end(), ::isspace);
     auto end = std::find_if_not(str.rbegin(), str.rend(), ::isspace).base();
 
     if (begin >= end)
-        return ""; 
-    return std::string(begin, end);
+        return "";
+    
+    str = std::string(begin, end);
+    return str;
 }
 
 
