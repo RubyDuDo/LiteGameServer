@@ -7,12 +7,9 @@ This document will record the features in plan and which have been finished.
 This project is going to develop a simple game server framework from scratch. It's splited to two period. This first period focuses on implement a single game server which contains most functions a simple game server needs, like network, db, player management , and config loading. The second period focuses on adding advance functions about scalability and high performance.
 
 ### Single Simple Server
-
-* load game config(.csv)
-* player manager
-* login manager
-* id generator
-* password encrypto
+* disconnect discover
+* logout handle
+* memory pool
 
 
 ### Scalable Server System
@@ -30,3 +27,7 @@ This project is going to develop a simple game server framework from scratch. It
 * load server config
 * cmake
 * epoll
+* log system
+* backend event log
+* load game config(.csv)
+* id generator
