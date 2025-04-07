@@ -10,6 +10,10 @@ This project is going to develop a simple game server framework from scratch. It
 * disconnect discover
 * logout handle
 * memory pool
+* Test
+  * unit test
+  * pressure test
+* CI/CD
 
 
 ### Scalable Server System
