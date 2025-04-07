@@ -66,7 +66,7 @@ void DBQueryHandler::queryAccount( int queryID , const DBRequest& req )
         {
             std::string name = res->getString( "account" );
             std::string passwd = res->getString("passwd");
-            int roleid = res->getInt("role_id");
+            int roleid = res->getInt("roleid");
             cout<<"Account Name :"<<name<<"_"<<passwd<<"_"<<roleid<<endl;
             
             DBRspAccout rspQuery;
@@ -101,8 +101,8 @@ void DBQueryHandler::queryRole( int queryID, const DBRequest& req )
     try {
         std::unique_ptr<sql::Statement> stmt( getSqlConn()->createStatement());
         
-        string strQuery = std::format("select * from roles where role_id = {}", query.roleid() );
-        cout<<strQuery<<endl;
+        string strQuery = std::format("select * from roles where roleid = {}", query.roleid() );
+        SPDLOG_DEBUG("Insert role: {}", strQuery);
     
         std::unique_ptr<sql::ResultSet> res( stmt->executeQuery(strQuery));
         
@@ -110,8 +110,8 @@ void DBQueryHandler::queryRole( int queryID, const DBRequest& req )
         {
             std::string name = res->getString( "name" );
             int level = res->getInt("level");
-            int roleid = res->getInt("role_id");
-            cout<<"Role Name :"<<name<<"_"<<roleid<<"_"<<level<<endl;
+            int roleid = res->getInt("roleid");
+            SPDLOG_DEBUG("Role Name:{}, ID:{}, level:{}", name, roleid, level );
             
             rspQuery.set_roleid(  roleid );
             rspQuery.set_name( name );
@@ -148,10 +148,13 @@ void DBQueryHandler::addRole( int queryID, const DBRequest& req)
             return DBErr_Fail;
         }
         
+        uint64_t roleID = query.roleid();
+        
         try {
 
             //step 1： insert a new role
-            string strQuery = std::format("insert into roles (name) values ('{}') ", query.name() );
+            string strQuery = std::format("insert into roles (roleid, name) values ('{}','{}') ", query.roleid(), query.name() );
+            SPDLOG_DEBUG("Insert role: {}", strQuery);
             cout<<strQuery<<endl;
             
             std::unique_ptr<sql::Statement> stmt( getSqlConn()->createStatement());
@@ -162,24 +165,11 @@ void DBQueryHandler::addRole( int queryID, const DBRequest& req)
                 cerr<<"Insert role fail"<<endl;
                 return DBErr_Fail;
             }
-            
-            //step 2: get the new roleid
-            int roleid = 0;
-            std::unique_ptr<sql::ResultSet> res( stmt->executeQuery( "SELECT LAST_INSERT_ID()" ));
-            if (res->next()) {
-                    int autoIncrementId = res->getInt(1);
-                    cout << "Auto-incremented ID: " << autoIncrementId << endl;
-                rspQuery.set_roleid( autoIncrementId);
-                roleid = autoIncrementId;
-            }
-            else{
-                SPDLOG_ERROR("Query Add Role insert Fail!");
-                return DBErr_Fail;
-            }
+
             
             //step 3: modify the account table
-            strQuery = std::format("update accounts set role_id = {} where account = '{}'", roleid, query.name() );
-            cout<<strQuery<<endl;
+            strQuery = std::format("update accounts set roleid = {} where account = '{}'", query.roleid(), query.name() );
+            SPDLOG_DEBUG("Insert role: {}", strQuery);
             rowAffected =  stmt->executeUpdate( strQuery );
             if( rowAffected == 0 )
             {
@@ -188,16 +178,16 @@ void DBQueryHandler::addRole( int queryID, const DBRequest& req)
             }
             
             //step 4: get the whole roleinfo from db
-            strQuery = std::format("select * from roles where role_id = {}", rspQuery.roleid() );
+            strQuery = std::format("select * from roles where roleid = {}", roleID );
             cout<<strQuery<<endl;
             std::unique_ptr<sql::ResultSet> resQuery( stmt->executeQuery(strQuery));
             
             if( resQuery->next() )
             {
-                std::string name = res->getString( "name" );
-                int level = res->getInt("level");
-                int roleid = res->getInt("role_id");
-                cout<<"Role Name :"<<name<<"_"<<roleid<<"_"<<level<<endl;
+                std::string name = resQuery->getString( "name" );
+                int level = resQuery->getInt("level");
+                int roleid = resQuery->getInt("roleid");
+                SPDLOG_DEBUG("Role Name:{}, ID:{}, level:{}", name, roleid, level );
                 
                 rspQuery.set_roleid(  roleid );
                 rspQuery.set_name( name );

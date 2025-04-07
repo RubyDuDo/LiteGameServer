@@ -24,6 +24,7 @@ const string DB_HOST_DEF = "tcp://127.0.0.1:3306";
 const string DB_USER_DEF = "admin";
 const string DB_PASSWD_DEF = "111111";
 const string DB_NAME_DEF = "MyGame";
+const int  ServerID_DEF = 1024;
 
 const string LOG_TYPE_DEF = "basic";
 const string LOG_PATH_DEF = "logs/app_basic.log";
@@ -80,6 +81,17 @@ bool GameLoop::Init()
     m_db.InitDB(host, user, passwd, dbname);
     m_db.registerQueryHandler( &m_dbQueryHandler);
     m_db.registerResponseHandler( this );
+   
+    int serverID = m_config.getInt("Server", "serverID", ServerID_DEF );
+    ret = m_idGen.init( serverID );
+    if( !ret ){
+        SPDLOG_ERROR("IDGenerator init failed!");
+    }
+    
+    ret = m_playerMgr.init();
+    if( !ret ){
+        SPDLOG_ERROR("PlayerManager init failed!");
+    }
     
     m_bRunning = true;
     
@@ -247,6 +259,7 @@ void GameLoop::dealQueryAccount( int sockID, const string& strPasswd, const DBRe
         req->mutable_head()->set_type( DBReqType_AddRole );
         
         DBReqAddRole addRole;
+        addRole.set_roleid( m_idGen.getNextID() );
         addRole.set_name( query.account() );
 
         req->set_payload( addRole.SerializeAsString() );

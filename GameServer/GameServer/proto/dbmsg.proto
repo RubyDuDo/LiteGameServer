@@ -72,7 +72,8 @@ message DBReqQueryRole
 
 message DBReqAddRole
 {
-    string name = 1;
+    uint64 roleid = 1;
+    string name = 2;
 }
 
 message DBRspRole

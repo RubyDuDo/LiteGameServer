@@ -1524,9 +1524,10 @@ class DBReqAddRole final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kNameFieldNumber = 1,
+    kNameFieldNumber = 2,
+    kRoleidFieldNumber = 1,
   };
-  // string name = 1;
+  // string name = 2;
   void clear_name();
   const std::string& name() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -1540,6 +1541,15 @@ class DBReqAddRole final :
   std::string* _internal_mutable_name();
   public:
 
+  // uint64 roleid = 1;
+  void clear_roleid();
+  uint64_t roleid() const;
+  void set_roleid(uint64_t value);
+  private:
+  uint64_t _internal_roleid() const;
+  void _internal_set_roleid(uint64_t value);
+  public:
+
   // @@protoc_insertion_point(class_scope:MyGameDB.DBReqAddRole)
  private:
   class _Internal;
@@ -1548,6 +1558,7 @@ class DBReqAddRole final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
+  uint64_t roleid_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_dbmsg_2eproto;
 };
@@ -2364,7 +2375,27 @@ inline void DBReqQueryRole::set_roleid(int32_t value) {
 
 // DBReqAddRole
 
-// string name = 1;
+// uint64 roleid = 1;
+inline void DBReqAddRole::clear_roleid() {
+  roleid_ = uint64_t{0u};
+}
+inline uint64_t DBReqAddRole::_internal_roleid() const {
+  return roleid_;
+}
+inline uint64_t DBReqAddRole::roleid() const {
+  // @@protoc_insertion_point(field_get:MyGameDB.DBReqAddRole.roleid)
+  return _internal_roleid();
+}
+inline void DBReqAddRole::_internal_set_roleid(uint64_t value) {
+  
+  roleid_ = value;
+}
+inline void DBReqAddRole::set_roleid(uint64_t value) {
+  _internal_set_roleid(value);
+  // @@protoc_insertion_point(field_set:MyGameDB.DBReqAddRole.roleid)
+}
+
+// string name = 2;
 inline void DBReqAddRole::clear_name() {
   name_.ClearToEmpty();
 }

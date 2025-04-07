@@ -18,6 +18,11 @@ bool PlayerManager::checkPass( const string& strName, const string& strPass ) co
     return true;
 }
 
+bool PlayerManager::init(  )
+{
+    return true;
+}
+
 int PlayerManager::getRoleID( const string& strName ) const
 {
     //

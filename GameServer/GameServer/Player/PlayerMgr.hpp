@@ -14,9 +14,11 @@ using namespace std;
 
 #include "Player.hpp"
 
+
 class PlayerManager
 {
 public:
+    bool init( );
     void onPlayerLogin( int sockID, const string& strName, const string& strPass );
     void addPlayer( int sockID, const string& strName, int roleid, int level );
     void onPlayerLogout( int sockID,int roleID );
@@ -40,8 +42,6 @@ private:
     
     map<int, int> m_mapRoleToSock;
     map<int, int> m_mapSockToRole;
-    
-    
 };
 
 #endif /* PlayerMgr_hpp */

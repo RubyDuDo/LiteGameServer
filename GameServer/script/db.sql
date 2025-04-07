@@ -8,14 +8,14 @@ USE `MyGame`;
 
 -- 创建 roles 表
 -- (先创建 roles 表，因为 accounts 表可能需要引用它)
-CREATE TABLE IF NOT EXISTS `roles` (
-    `role_id` INT NOT NULL AUTO_INCREMENT COMMENT '角色ID，主键，自增',
-    `name` VARCHAR(50) NOT NULL COMMENT '角色名称',
-    `level` INT NOT NULL DEFAULT 1 COMMENT '角色等级，默认为1',
-    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间，默认为当前时间戳',
-    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间，默认为当前时间戳，并在更新时自动更新',
-    PRIMARY KEY (`role_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色信息表';
+CREATE TABLE `roles` (
+  `id` BIGINT UNSIGNED NOT NULL,          
+  `name` VARCHAR(50) NOT NULL,         
+  `level` INT NOT NULL DEFAULT 1,            
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
+  PRIMARY KEY (`id`)        
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; 
 
 -- 创建 accounts 表
 CREATE TABLE IF NOT EXISTS `accounts` (

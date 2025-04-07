@@ -128,7 +128,8 @@ struct DBReqQueryRoleDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DBReqQueryRoleDefaultTypeInternal _DBReqQueryRole_default_instance_;
 PROTOBUF_CONSTEXPR DBReqAddRole::DBReqAddRole(
     ::_pbi::ConstantInitialized)
-  : name_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
+  : name_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  , roleid_(uint64_t{0u}){}
 struct DBReqAddRoleDefaultTypeInternal {
   PROTOBUF_CONSTEXPR DBReqAddRoleDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -226,6 +227,7 @@ const uint32_t TableStruct_dbmsg_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(pr
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::MyGameDB::DBReqAddRole, roleid_),
   PROTOBUF_FIELD_OFFSET(::MyGameDB::DBReqAddRole, name_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::MyGameDB::DBRspRole, _internal_metadata_),
@@ -247,7 +249,7 @@ static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protode
   { 47, -1, -1, sizeof(::MyGameDB::DBReqModAccount)},
   { 55, -1, -1, sizeof(::MyGameDB::DBReqQueryRole)},
   { 62, -1, -1, sizeof(::MyGameDB::DBReqAddRole)},
-  { 69, -1, -1, sizeof(::MyGameDB::DBRspRole)},
+  { 70, -1, -1, sizeof(::MyGameDB::DBRspRole)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
@@ -275,19 +277,19 @@ const char descriptor_table_protodef_dbmsg_2eproto[] PROTOBUF_SECTION_VARIABLE(p
   "(\t\">\n\013DBRspAccout\022\017\n\007account\030\001 \001(\t\022\016\n\006pa"
   "sswd\030\002 \001(\t\022\016\n\006roleid\030\003 \001(\005\"2\n\017DBReqModAc"
   "count\022\017\n\007account\030\001 \001(\t\022\016\n\006roleid\030\002 \001(\005\" "
-  "\n\016DBReqQueryRole\022\016\n\006roleid\030\001 \001(\005\"\034\n\014DBRe"
-  "qAddRole\022\014\n\004name\030\001 \001(\t\"8\n\tDBRspRole\022\016\n\006r"
-  "oleid\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\r\n\005level\030\003 \001(\005"
-  "*\?\n\013DBErrorType\022\014\n\010DBErr_OK\020\000\022\016\n\nDBErr_F"
-  "ail\020\001\022\022\n\016DBErr_NotExist\020\002*\210\001\n\tDBReqType\022"
-  "\025\n\021DBReqType_Default\020\000\022\032\n\026DBReqType_Quer"
-  "yAccount\020\001\022\030\n\024DBReqType_ModAccount\020\002\022\027\n\023"
-  "DBReqType_QueryRole\020\003\022\025\n\021DBReqType_AddRo"
-  "le\020\004b\006proto3"
+  "\n\016DBReqQueryRole\022\016\n\006roleid\030\001 \001(\005\",\n\014DBRe"
+  "qAddRole\022\016\n\006roleid\030\001 \001(\004\022\014\n\004name\030\002 \001(\t\"8"
+  "\n\tDBRspRole\022\016\n\006roleid\030\001 \001(\005\022\014\n\004name\030\002 \001("
+  "\t\022\r\n\005level\030\003 \001(\005*\?\n\013DBErrorType\022\014\n\010DBErr"
+  "_OK\020\000\022\016\n\nDBErr_Fail\020\001\022\022\n\016DBErr_NotExist\020"
+  "\002*\210\001\n\tDBReqType\022\025\n\021DBReqType_Default\020\000\022\032"
+  "\n\026DBReqType_QueryAccount\020\001\022\030\n\024DBReqType_"
+  "ModAccount\020\002\022\027\n\023DBReqType_QueryRole\020\003\022\025\n"
+  "\021DBReqType_AddRole\020\004b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_dbmsg_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_dbmsg_2eproto = {
-    false, false, 772, descriptor_table_protodef_dbmsg_2eproto,
+    false, false, 788, descriptor_table_protodef_dbmsg_2eproto,
     "dbmsg.proto",
     &descriptor_table_dbmsg_2eproto_once, nullptr, 0, 10,
     schemas, file_default_instances, TableStruct_dbmsg_2eproto::offsets,
@@ -2072,6 +2074,7 @@ DBReqAddRole::DBReqAddRole(const DBReqAddRole& from)
     name_.Set(from._internal_name(), 
       GetArenaForAllocation());
   }
+  roleid_ = from.roleid_;
   // @@protoc_insertion_point(copy_constructor:MyGameDB.DBReqAddRole)
 }
 
@@ -2080,6 +2083,7 @@ name_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
   name_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+roleid_ = uint64_t{0u};
 }
 
 DBReqAddRole::~DBReqAddRole() {
@@ -2107,6 +2111,7 @@ void DBReqAddRole::Clear() {
   (void) cached_has_bits;
 
   name_.ClearToEmpty();
+  roleid_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -2116,9 +2121,17 @@ const char* DBReqAddRole::_InternalParse(const char* ptr, ::_pbi::ParseContext* 
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // string name = 1;
+      // uint64 roleid = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          roleid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string name = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_name();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
@@ -2155,14 +2168,20 @@ uint8_t* DBReqAddRole::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // string name = 1;
+  // uint64 roleid = 1;
+  if (this->_internal_roleid() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_roleid(), target);
+  }
+
+  // string name = 2;
   if (!this->_internal_name().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_name().data(), static_cast<int>(this->_internal_name().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "MyGameDB.DBReqAddRole.name");
     target = stream->WriteStringMaybeAliased(
-        1, this->_internal_name(), target);
+        2, this->_internal_name(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2181,11 +2200,16 @@ size_t DBReqAddRole::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string name = 1;
+  // string name = 2;
   if (!this->_internal_name().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_name());
+  }
+
+  // uint64 roleid = 1;
+  if (this->_internal_roleid() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_roleid());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -2213,6 +2237,9 @@ void DBReqAddRole::MergeFrom(const DBReqAddRole& from) {
   if (!from._internal_name().empty()) {
     _internal_set_name(from._internal_name());
   }
+  if (from._internal_roleid() != 0) {
+    _internal_set_roleid(from._internal_roleid());
+  }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -2236,6 +2263,7 @@ void DBReqAddRole::InternalSwap(DBReqAddRole* other) {
       &name_, lhs_arena,
       &other->name_, rhs_arena
   );
+  swap(roleid_, other->roleid_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata DBReqAddRole::GetMetadata() const {

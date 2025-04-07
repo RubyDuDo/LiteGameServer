@@ -18,6 +18,8 @@
 
 #include "Network/INetworkMgr.hpp"
 #include "GameNetHelper.hpp"
+#include "../Utils/IDGenerator.hpp"
+
 using TimePoint = std::chrono::steady_clock::time_point;
 
 
@@ -78,6 +80,8 @@ private:
     map<int, std::function<void( const DBResponse&)> > m_mapDBRspFuns;
     
     std::atomic<bool> m_bRunning = false;
+    
+    IDGenerator m_idGen;
     
     
 };
