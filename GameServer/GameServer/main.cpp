@@ -82,7 +82,7 @@ int main(int argc, const char * argv[]) {
 
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
-    SPDLOG_INFO("Current working dir: %s\n", cwd);
+    SPDLOG_INFO("Current working dir: {}\n", cwd);
     
     GameLoop game;
     m_pGame = &game;
