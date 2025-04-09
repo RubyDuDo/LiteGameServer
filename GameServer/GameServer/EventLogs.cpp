@@ -64,7 +64,7 @@ void EventLogs::initLoggers( const std::string& logName,
     }
 }
 
-void EventLogs::onEventLogin( int ret,  int roleID )
+void EventLogs::onEventLogin( int ret,  uint64_t roleID )
 {
     if( m_eventLogger )
     {
@@ -78,7 +78,7 @@ void EventLogs::onEventLogin( int ret,  int roleID )
     }
 }
 
-void EventLogs::onEventLogout( int ret, int roleID )
+void EventLogs::onEventLogout( int ret, uint64_t roleID )
 {
     if( m_eventLogger )
     {

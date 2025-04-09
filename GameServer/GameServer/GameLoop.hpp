@@ -64,7 +64,6 @@ public:
     virtual void onConnect( const TcpSocket& sock ) ;
     
 private:
-    int m_nextRoleID = 1;
     PlayerManager m_playerMgr;
     
     DBMgr m_db;

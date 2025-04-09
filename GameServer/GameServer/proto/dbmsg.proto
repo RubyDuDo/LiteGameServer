@@ -56,18 +56,18 @@ message DBRspAccout
 {
     string account = 1;
     string passwd = 2;
-    int32 roleid = 3;
+    uint64 roleid = 3;
 }
 
 message DBReqModAccount
 {
     string account = 1;
-    int32 roleid = 2;
+    uint64 roleid = 2;
 }
 
 message DBReqQueryRole
 {
-    int32 roleid = 1;
+    uint64 roleid = 1;
 }
 
 message DBReqAddRole
@@ -78,7 +78,7 @@ message DBReqAddRole
 
 message DBRspRole
 {
-    int32 roleid = 1;
+    uint64 roleid = 1;
     string name = 2;
     int32 level = 3;
 }

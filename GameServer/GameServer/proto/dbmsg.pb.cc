@@ -91,7 +91,7 @@ PROTOBUF_CONSTEXPR DBRspAccout::DBRspAccout(
     ::_pbi::ConstantInitialized)
   : account_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
   , passwd_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , roleid_(0){}
+  , roleid_(uint64_t{0u}){}
 struct DBRspAccoutDefaultTypeInternal {
   PROTOBUF_CONSTEXPR DBRspAccoutDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -104,7 +104,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 PROTOBUF_CONSTEXPR DBReqModAccount::DBReqModAccount(
     ::_pbi::ConstantInitialized)
   : account_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , roleid_(0){}
+  , roleid_(uint64_t{0u}){}
 struct DBReqModAccountDefaultTypeInternal {
   PROTOBUF_CONSTEXPR DBReqModAccountDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -116,7 +116,7 @@ struct DBReqModAccountDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DBReqModAccountDefaultTypeInternal _DBReqModAccount_default_instance_;
 PROTOBUF_CONSTEXPR DBReqQueryRole::DBReqQueryRole(
     ::_pbi::ConstantInitialized)
-  : roleid_(0){}
+  : roleid_(uint64_t{0u}){}
 struct DBReqQueryRoleDefaultTypeInternal {
   PROTOBUF_CONSTEXPR DBReqQueryRoleDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -142,7 +142,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 PROTOBUF_CONSTEXPR DBRspRole::DBRspRole(
     ::_pbi::ConstantInitialized)
   : name_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , roleid_(0)
+  , roleid_(uint64_t{0u})
   , level_(0){}
 struct DBRspRoleDefaultTypeInternal {
   PROTOBUF_CONSTEXPR DBRspRoleDefaultTypeInternal()
@@ -275,11 +275,11 @@ const char descriptor_table_protodef_dbmsg_2eproto[] PROTOBUF_SECTION_VARIABLE(p
   "d\030\001 \001(\0132\022.MyGameDB.QRsqHead\022\017\n\007payload\030\002"
   " \001(\t\"$\n\021DBReqQueryAccount\022\017\n\007account\030\001 \001"
   "(\t\">\n\013DBRspAccout\022\017\n\007account\030\001 \001(\t\022\016\n\006pa"
-  "sswd\030\002 \001(\t\022\016\n\006roleid\030\003 \001(\005\"2\n\017DBReqModAc"
-  "count\022\017\n\007account\030\001 \001(\t\022\016\n\006roleid\030\002 \001(\005\" "
-  "\n\016DBReqQueryRole\022\016\n\006roleid\030\001 \001(\005\",\n\014DBRe"
+  "sswd\030\002 \001(\t\022\016\n\006roleid\030\003 \001(\004\"2\n\017DBReqModAc"
+  "count\022\017\n\007account\030\001 \001(\t\022\016\n\006roleid\030\002 \001(\004\" "
+  "\n\016DBReqQueryRole\022\016\n\006roleid\030\001 \001(\004\",\n\014DBRe"
   "qAddRole\022\016\n\006roleid\030\001 \001(\004\022\014\n\004name\030\002 \001(\t\"8"
-  "\n\tDBRspRole\022\016\n\006roleid\030\001 \001(\005\022\014\n\004name\030\002 \001("
+  "\n\tDBRspRole\022\016\n\006roleid\030\001 \001(\004\022\014\n\004name\030\002 \001("
   "\t\022\r\n\005level\030\003 \001(\005*\?\n\013DBErrorType\022\014\n\010DBErr"
   "_OK\020\000\022\016\n\nDBErr_Fail\020\001\022\022\n\016DBErr_NotExist\020"
   "\002*\210\001\n\tDBReqType\022\025\n\021DBReqType_Default\020\000\022\032"
@@ -1434,7 +1434,7 @@ passwd_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
   passwd_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-roleid_ = 0;
+roleid_ = uint64_t{0u};
 }
 
 DBRspAccout::~DBRspAccout() {
@@ -1464,7 +1464,7 @@ void DBRspAccout::Clear() {
 
   account_.ClearToEmpty();
   passwd_.ClearToEmpty();
-  roleid_ = 0;
+  roleid_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1494,10 +1494,10 @@ const char* DBRspAccout::_InternalParse(const char* ptr, ::_pbi::ParseContext* c
         } else
           goto handle_unusual;
         continue;
-      // int32 roleid = 3;
+      // uint64 roleid = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
-          roleid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          roleid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1551,10 +1551,10 @@ uint8_t* DBRspAccout::_InternalSerialize(
         2, this->_internal_passwd(), target);
   }
 
-  // int32 roleid = 3;
+  // uint64 roleid = 3;
   if (this->_internal_roleid() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteInt32ToArray(3, this->_internal_roleid(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(3, this->_internal_roleid(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1587,9 +1587,9 @@ size_t DBRspAccout::ByteSizeLong() const {
         this->_internal_passwd());
   }
 
-  // int32 roleid = 3;
+  // uint64 roleid = 3;
   if (this->_internal_roleid() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_roleid());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_roleid());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -1691,7 +1691,7 @@ account_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
   account_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-roleid_ = 0;
+roleid_ = uint64_t{0u};
 }
 
 DBReqModAccount::~DBReqModAccount() {
@@ -1719,7 +1719,7 @@ void DBReqModAccount::Clear() {
   (void) cached_has_bits;
 
   account_.ClearToEmpty();
-  roleid_ = 0;
+  roleid_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1739,10 +1739,10 @@ const char* DBReqModAccount::_InternalParse(const char* ptr, ::_pbi::ParseContex
         } else
           goto handle_unusual;
         continue;
-      // int32 roleid = 2;
+      // uint64 roleid = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
-          roleid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          roleid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1786,10 +1786,10 @@ uint8_t* DBReqModAccount::_InternalSerialize(
         1, this->_internal_account(), target);
   }
 
-  // int32 roleid = 2;
+  // uint64 roleid = 2;
   if (this->_internal_roleid() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteInt32ToArray(2, this->_internal_roleid(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(2, this->_internal_roleid(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1815,9 +1815,9 @@ size_t DBReqModAccount::ByteSizeLong() const {
         this->_internal_account());
   }
 
-  // int32 roleid = 2;
+  // uint64 roleid = 2;
   if (this->_internal_roleid() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_roleid());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_roleid());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -1900,7 +1900,7 @@ DBReqQueryRole::DBReqQueryRole(const DBReqQueryRole& from)
 }
 
 inline void DBReqQueryRole::SharedCtor() {
-roleid_ = 0;
+roleid_ = uint64_t{0u};
 }
 
 DBReqQueryRole::~DBReqQueryRole() {
@@ -1926,7 +1926,7 @@ void DBReqQueryRole::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  roleid_ = 0;
+  roleid_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1936,10 +1936,10 @@ const char* DBReqQueryRole::_InternalParse(const char* ptr, ::_pbi::ParseContext
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // int32 roleid = 1;
+      // uint64 roleid = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          roleid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          roleid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1973,10 +1973,10 @@ uint8_t* DBReqQueryRole::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // int32 roleid = 1;
+  // uint64 roleid = 1;
   if (this->_internal_roleid() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteInt32ToArray(1, this->_internal_roleid(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_roleid(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1995,9 +1995,9 @@ size_t DBReqQueryRole::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // int32 roleid = 1;
+  // uint64 roleid = 1;
   if (this->_internal_roleid() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_roleid());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_roleid());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -2349,10 +2349,10 @@ const char* DBRspRole::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // int32 roleid = 1;
+      // uint64 roleid = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          roleid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          roleid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2404,10 +2404,10 @@ uint8_t* DBRspRole::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // int32 roleid = 1;
+  // uint64 roleid = 1;
   if (this->_internal_roleid() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteInt32ToArray(1, this->_internal_roleid(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_roleid(), target);
   }
 
   // string name = 2;
@@ -2449,9 +2449,9 @@ size_t DBRspRole::ByteSizeLong() const {
         this->_internal_name());
   }
 
-  // int32 roleid = 1;
+  // uint64 roleid = 1;
   if (this->_internal_roleid() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_roleid());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_roleid());
   }
 
   // int32 level = 3;

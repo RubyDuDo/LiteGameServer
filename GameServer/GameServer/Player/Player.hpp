@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <string>
+#include <stdint.h>
 using namespace std;
 
 enum PlayerState
@@ -25,7 +26,7 @@ public:
     Player() = default;
     
 public:
-    int m_roleID = 0;
+    uint64_t m_roleID = 0;
     int m_level = 0;
     string m_strName;
     PlayerState m_state = Player_BeforeLogin;

@@ -11,6 +11,7 @@
 #include "spdlog/spdlog.h"
 
 #include <stdio.h>
+#include <stdint.h>
 
 class EventLogs{
 public:
@@ -23,8 +24,8 @@ private:
     static EventLogs* m_pInstance;
 
 public:
-    void onEventLogin( int ret, int roleID );
-    void onEventLogout( int ret, int roleID );
+    void onEventLogin( int ret, uint64_t roleID );
+    void onEventLogout( int ret, uint64_t roleID );
     
 private:
     void initLoggers( const std::string& logName, std::shared_ptr<spdlog::logger>& logger, const std::string& logFileName );
