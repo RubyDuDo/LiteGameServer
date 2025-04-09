@@ -130,6 +130,8 @@ void NetworkMgrKqueue::onKevent( const struct kevent& ev )
     if (ident == m_userEventIdent && filter == EVFILT_USER) {
         SPDLOG_TRACE("User event triggered");
         onNewSendMsg();
+
+        handleCloseSocks();
         return; // Processed user event
     }
 
@@ -282,6 +284,18 @@ void NetworkMgrKqueue::handleSendMsg( TcpSocket& sock )
          SPDLOG_TRACE("Send buffer still has data for fd {} after sending, WRITE remains enabled.", sock.m_sock);
          // Write filter remains enabled/active
     }
+
+    // after send message, check if this socket is waiting to close
+    if( slot.m_sendBuff.isEmpty() )
+    {
+        std::lock_guard lk( m_closeMtx );
+        auto itClose = m_waitingCloseSocks.find( sock.m_sock );
+        if( itClose != m_waitingCloseSocks.end() )
+        {
+            m_waitingCloseSocks.erase( itClose );
+            removeSock( sock.m_sock );
+        }
+    }
 }
 
 // Called when user event wakes up the thread, indicating messages in queue
@@ -377,4 +391,12 @@ void NetworkMgrKqueue::innerNotifyThreadExit()
     // Trigger the user event to ensure the innerRun loop wakes up,
     // checks m_bRunning, and exits cleanly.
     notifyThread();
+}
+
+// Called by base class removeSock
+void NetworkMgrKqueue::innerRemoveSock(int fd) {
+    SPDLOG_DEBUG("innerRemoveSock: Removing fd={} from kqueue", fd);
+    // Remove filters from kqueue. Ignore errors (might be already gone).
+    updateKevent(fd, EVFILT_READ, EV_DELETE);
+    updateKevent(fd, EVFILT_WRITE, EV_DELETE);
 }

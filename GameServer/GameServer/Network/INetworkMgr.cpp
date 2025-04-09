@@ -227,6 +227,38 @@ bool INetworkMgr::onReceiveMsg( std::shared_ptr<TcpSocket> sock )
 
     return bClose;
 }
+void INetworkMgr::handleCloseSocks()
+{
+    std::set<int> closeSet;
+    {
+        std::lock_guard lk( m_closeMtx );
+        closeSet = m_waitingCloseSocks;
+    }
+
+    for( auto fd  : closeSet  )
+    {
+        // if there are some message to send, wait for it
+        // because close sock are usually send by logout
+        // we should make sure the client get the logout message
+        // if the slot or socketInfo is invalid, then remove directly
+        // because the message can't be sendout already 
+        auto itSlot = m_mapSlot.find( fd );
+        auto itSock = m_mapSocks.find( fd );
+        if( itSlot != m_mapSlot.end() && itSock != m_mapSocks.end()
+            && !itSlot->second.m_sendBuff.isEmpty()  )
+        {
+            continue;
+        }
+        else{
+            removeSock( fd );
+            {
+                std::lock_guard lk( m_closeMtx );
+                m_waitingCloseSocks.erase( fd );
+            }
+        }
+    }
+
+}
 
 void INetworkMgr::onDisconnect( int fd )
 {

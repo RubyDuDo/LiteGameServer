@@ -39,6 +39,7 @@ private:
     // Helper to update kqueue registrations
     bool updateKevent(int ident, short filter, u_short flags, u_int fflags = 0, intptr_t data = 0, void *udata = nullptr);
 
+    virtual void innerRemoveSock(int fd) override;
 
 private:
     int m_kqueueFd = -1;        // Kqueue file descriptor (replaces epollFd)

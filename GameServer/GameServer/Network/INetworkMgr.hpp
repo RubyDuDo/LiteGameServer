@@ -48,6 +48,8 @@ public:
     virtual void innerRemoveSock( int fd ) {};
 
     virtual void notifyThread(){};
+
+    void handleCloseSocks();
     
 private:
     void notifyThreadExit();
