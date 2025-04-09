@@ -33,11 +33,12 @@ private:
 
     void handleSendMsg( TcpSocket& sock );
 
-    void notifyThread();
+    virtual void notifyThread() override ;
+    virtual void innerRemoveSock( int fd ) override;
+
+    void handleCloseSocks();
     
     
-private:
-    void clearInvalidSock();
     
 private:
     int m_epollFd = -1;

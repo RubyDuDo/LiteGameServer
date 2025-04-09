@@ -275,3 +275,29 @@ void INetworkMgr::innerSendMsg( int fd, const std::string& msg )
 
 }
 
+void INetworkMgr::closeSock( int fd   )
+{
+    {
+        std::lock_guard lk(m_closeMtx);
+        m_waitingCloseSocks.insert( fd );
+    }
+    notifyThread();
+}
+
+void INetworkMgr::removeSock( int fd )
+{
+    SPDLOG_DEBUG("removeSock:{}", fd );
+    innerRemoveSock( fd );
+
+    m_mapSlot.erase( fd );
+    m_mapSocks.erase( fd );
+
+    auto it = std::find_if( m_setSocks.begin(), m_setSocks.end(), [fd]( const TcpSocketPtr& sock ) {
+        return sock->m_sock == fd;
+    });
+    if( it != m_setSocks.end() )
+    {
+        m_setSocks.erase( it );
+    }
+}
+

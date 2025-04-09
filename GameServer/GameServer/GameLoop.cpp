@@ -330,6 +330,7 @@ void GameLoop::dealAddRole( int sockID, const DBResponse& rsp )
 
 void GameLoop::dealQueryRole( int sockID, const DBResponse& rsp  )
 {
+    SPDLOG_DEBUG("Enter: sock:{}", sockID );
     if( rsp.head().res() == DBErr_Fail )
     {
         return;
@@ -443,6 +444,8 @@ void GameLoop::dealLogout( int sockID, const Msg& msg )
     SPDLOG_INFO("Receive Logout {}, sock:{}", logout.roleid(), sockID );
     
     m_playerMgr.onPlayerLogout( sockID, logout.roleid() );
+
+    INetworkMgr::getInstance()->closeSock( sockID );
 }
 
 GameLoop::~GameLoop()

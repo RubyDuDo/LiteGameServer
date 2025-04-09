@@ -85,7 +85,6 @@ void EventLogs::onEventLogout( int ret, uint64_t roleID )
         json info;
         info["evtType"] = "Logout";
         info["t"] = getTimeStamp();
-        
         info["rID"] = roleID;
         info["ret"] = ret;
         m_eventLogger->info(info.dump());
@@ -97,4 +96,5 @@ int64_t EventLogs::getTimeStamp()
     auto now = std::chrono::system_clock::now();
     auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
     int64_t timestamp_ms = duration_ms.count();
+    return timestamp_ms;
 }

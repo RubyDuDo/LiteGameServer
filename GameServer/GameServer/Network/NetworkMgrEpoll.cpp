@@ -3,7 +3,6 @@
 #include <sys/epoll.h>  // For epoll_create1
 #include <sys/eventfd.h> // For eventfd
 #include <unistd.h>    // For close()
-#include <stdio.h>     // For perror()
 #include <stdlib.h>    // For EXIT_FAILURE
 #include <iostream>
 
@@ -48,7 +47,7 @@ bool NetworkMgrEpoll::innerInit()
 
     struct epoll_event evListen;
     evListen.data.fd = m_listenSock->m_sock;
-    evListen.events = EPOLLIN ;
+    evListen.events = EPOLLIN  ;
     if (epoll_ctl(m_epollFd, EPOLL_CTL_ADD, m_listenSock->m_sock, &evListen) == -1) {
         SPDLOG_ERROR("epoll_ctl: listen_sock");
         return false;
@@ -77,13 +76,12 @@ void NetworkMgrEpoll::innerRun()
         events.clear();
         int nfds = epoll_wait(m_epollFd, events.data(), MAX_EVENTS, -1);
         if (nfds == -1) {
-            SPDLOG_ERROR("epoll_wait");
-
             if( errno == EINTR )
             {
                 continue; // Interrupted by signal, retry
             }
             else{
+                SPDLOG_ERROR("epoll_wait");
                 break; // Other error, exit loop
             }
         }
@@ -102,7 +100,7 @@ void NetworkMgrEpoll::innerRun()
                     auto newSock = m_listenSock->Accept();
                     if (!newSock) {
                         SPDLOG_ERROR("Accept Error");
-                        continue;
+                        break;
                     }
                 
                     onConnect( newSock );
@@ -121,6 +119,8 @@ void NetworkMgrEpoll::innerRun()
                 }
                 else{
                     onNewSendMsg();
+
+                    handleCloseSocks();
                 }
             } else {
                 // Handle data from connected socket
@@ -203,10 +203,56 @@ void NetworkMgrEpoll::handleSendMsg( TcpSocket& sock )
         }
     }
 
+    // after send message, check if this socket is waiting to close
+    if( slot.m_sendBuff.isEmpty() )
+    {
+        std::lock_guard lk( m_closeMtx );
+        auto itClose = m_waitingCloseSocks.find( sock.m_sock );
+        if( itClose != m_waitingCloseSocks.end() )
+        {
+            m_waitingCloseSocks.erase( itClose );
+            removeSock( sock.m_sock );
+        }
+    }
+
+}
+
+void NetworkMgrEpoll::handleCloseSocks()
+{
+    std::set<int> closeSet;
+    {
+        std::lock_guard lk( m_closeMtx );
+        closeSet = m_waitingCloseSocks;
+    }
+
+    for( auto fd  : closeSet  )
+    {
+        // if there are some message to send, wait for it
+        // because close sock are usually send by logout
+        // we should make sure the client get the logout message
+        // if the slot or socketInfo is invalid, then remove directly
+        // because the message can't be sendout already 
+        auto itSlot = m_mapSlot.find( fd );
+        auto itSock = m_mapSocks.find( fd );
+        if( itSlot != m_mapSlot.end() && itSock != m_mapSocks.end()
+            && !itSlot->second.m_sendBuff.isEmpty()  )
+        {
+            continue;
+        }
+        else{
+            removeSock( fd );
+            {
+                std::lock_guard lk( m_closeMtx );
+                m_waitingCloseSocks.erase( fd );
+            }
+        }
+    }
+
 }
 
 void NetworkMgrEpoll::onNewSendMsg()
 {
+    SPDLOG_DEBUG("onNewSendMsg");
     while( true )
     {
         auto it = m_msgQueue.try_pop();
@@ -236,6 +282,7 @@ void NetworkMgrEpoll::onNewSendMsg()
             break;
         }
     }
+    SPDLOG_DEBUG("onNewSendMsg, exit");
 }
 
 void NetworkMgrEpoll::onReceiveMsgInner( int fd, const std::string& msg )
@@ -272,6 +319,12 @@ void NetworkMgrEpoll::innerSendMsg( int fd, const std::string& msg )
 
 void NetworkMgrEpoll::notifyThread()
 {
+    SPDLOG_DEBUG("Notify Thread");
+    if( m_eventFd == -1 )
+    {
+        SPDLOG_ERROR("eventfd not initialized");
+        return;
+    }
     uint64_t notification = 1;
     ssize_t ret = write( m_eventFd, &notification, sizeof(notification) );
     if( ret < 0 )
@@ -294,7 +347,14 @@ void NetworkMgrEpoll::innerNotifyThreadExit(){
 }
 
 
-void NetworkMgrEpoll::clearInvalidSock()
+void NetworkMgrEpoll::innerRemoveSock( int fd )
 {
+    struct epoll_event ev;
+    ev.data.fd = fd;
 
+    if( epoll_ctl( m_epollFd, EPOLL_CTL_DEL, fd, &ev ) == -1 )
+    {
+        SPDLOG_ERROR("epoll_ctl: fd");
+        return;
+    }
 }

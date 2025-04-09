@@ -12,6 +12,7 @@
 #include <string>
 #include "TcpSocket.hpp"
 #include <memory>
+#include <mutex>
 #include "../Utils/MsgQueue.hpp"
 #include "NetSlot.hpp"
 #include <map>
@@ -41,6 +42,12 @@ public:
     void sendMsg( int fd, const std::string& msg );
     
     virtual ~INetworkMgr();
+
+    void closeSock( int fd );
+    void removeSock( int fd );
+    virtual void innerRemoveSock( int fd ) {};
+
+    virtual void notifyThread(){};
     
 private:
     void notifyThreadExit();
@@ -76,6 +83,9 @@ protected:
     MsgQueue< std::pair<int, std::string> > m_msgQueue;
     std::map<int, NetSlot> m_mapSlot;
     std::optional<std::thread> m_runThread;
+
+    std::mutex m_closeMtx;
+    std::set<int> m_waitingCloseSocks;
     
 };
 
