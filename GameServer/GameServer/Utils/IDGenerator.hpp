@@ -35,10 +35,10 @@ public:
     static constexpr uint8_t timestampShift = sequenceBits + serverIdBits;
     
 private:
-    int64_t m_serverID;
-    int64_t m_epochTimestamp;
-    int64_t m_lastTimestamp;
-    int64_t m_sequeceID;
+    int64_t m_serverID = 0 ;
+    int64_t m_epochTimestamp = 0 ;
+    int64_t m_lastTimestamp = 0 ;
+    int64_t m_sequeceID = 0 ;
     
     std::mutex mutex_;
     
