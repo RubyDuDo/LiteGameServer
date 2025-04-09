@@ -62,6 +62,8 @@ target_sources(GameServer
     Utils/LoggerHelper.cpp 
     Utils/LoggerHelper.hpp
     Utils/json.hpp
+    Utils/IDGenerator.cpp 
+    Utils/IDGenerator.hpp
 )
 
 source_group("Utils" FILES
@@ -72,6 +74,8 @@ source_group("Utils" FILES
     Utils/LoggerHelper.cpp 
     Utils/LoggerHelper.hpp
     Utils/json.hpp
+    Utils/IDGenerator.cpp 
+    Utils/IDGenerator.hpp
 )
 
 target_sources(GameServer
