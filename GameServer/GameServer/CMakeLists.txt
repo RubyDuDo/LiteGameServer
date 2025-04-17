@@ -25,6 +25,8 @@ target_sources(GameServer
     DBQueryHandler.hpp
     EventLogs.cpp 
     EventLogs.hpp
+    Game/Event.cpp 
+    Game/Event.hpp
 )
 source_group("Game" FILES
     GameLoop.cpp
@@ -36,6 +38,8 @@ source_group("Game" FILES
     DBQueryHandler.hpp
     EventLogs.cpp 
     EventLogs.hpp
+    Game/Event.cpp 
+    Game/Event.hpp
 )
 
 target_sources(GameServer
@@ -129,7 +133,8 @@ target_sources(GameServer
 source_group("Player" FILES
     Player/Player.cpp
     Player/Player.hpp
-    Player/PlayerMgr.cpp)
+    Player/PlayerMgr.cpp
+    Player/PlayerMgr.hpp)
 
 target_sources(GameServer
     PRIVATE

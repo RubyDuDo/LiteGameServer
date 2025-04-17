@@ -55,7 +55,7 @@ void MsgQueue<T>::push( std::unique_ptr<T>&& value)
 {
     {
         lock_guard lk(m_mut);
-        m_queue.push( value );
+        m_queue.push( std::move(value) );
     }
     m_cond.notify_one();
 }

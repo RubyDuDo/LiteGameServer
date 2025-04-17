@@ -156,13 +156,17 @@ void GameLoop::onReceiveMsg( int fd, const std::string& msg )
 
 void GameLoop::onDisconnect( int fd )
 {
-    SPDLOG_INFO("onDisconnect fd:{}", fd );
+    auto evt = new EventDisconnect( fd );
+    sendEvent( std::unique_ptr<Event>( evt ) );
+    SPDLOG_DEBUG("onDisconnect fd:{}", fd );
     
 }
 
 void GameLoop::onConnect( const TcpSocket& sock )
 {
-    SPDLOG_INFO("onConnect fd:{}", sock.m_sock );
+    auto evt = new EventConnect( sock.m_sock );
+    sendEvent( std::unique_ptr<Event>( evt ) );
+    SPDLOG_DEBUG("onConnect fd:{}", sock.m_sock );
     
 }
 
@@ -195,6 +199,15 @@ void GameLoop::update( const TimePoint& now)
         itdb = m_dbmsgRsp.try_pop();
     }
     
+    //deal Inner Event
+    auto itEvt = m_innerEvts.try_pop();
+    while( itEvt )
+    {
+        dealRecvEvent( *itEvt );
+        
+        itEvt = m_innerEvts.try_pop();
+    }
+    
     //todo update gamelogic
 }
 
@@ -212,6 +225,8 @@ void GameLoop::onReceiveDBRsp( int queryID, std::unique_ptr<DBResponse>&& rsp )
     SPDLOG_DEBUG("onReceiveDBRsp:{0},{1}", (int)rsp->head().type(), queryID );
     m_dbmsgRsp.push( make_pair( queryID, std::move(rsp) ) );
 }
+
+
 
 //void GameLoop::dealDBRsp( const DBResponse& rsp )
 //{
@@ -446,6 +461,41 @@ void GameLoop::dealLogout( int sockID, const Msg& msg )
     m_playerMgr.onPlayerLogout( sockID, logout.roleid() );
 
     INetworkMgr::getInstance()->closeSock( sockID );
+}
+
+void GameLoop::sendEvent( std::unique_ptr<Event>&& evt )
+{
+    m_innerEvts.push( std::move(evt) );
+}
+
+void GameLoop::dealRecvEvent( Event& evt )
+{
+    switch( evt.m_type )
+    {
+        case EventType::Evt_Connect:
+            dealEvtConnect( evt );
+            break;
+        case EventType::Evt_Disconnect:
+            dealEvtDisconnect( evt );
+            break;
+        default:
+            SPDLOG_ERROR("Invalid type:{}", (int)evt.m_type);
+            break;
+    }
+}
+
+void GameLoop::dealEvtConnect( Event& evt )
+{
+    EventConnect& evtConnect = static_cast<EventConnect&>(evt);
+    //there is nothing todo currently...
+}
+
+void GameLoop::dealEvtDisconnect( Event& evt )
+{
+    EventDisconnect& evtDisconnect = static_cast<EventDisconnect&>(evt);
+    //there should remove the player
+    
+    m_playerMgr.onSockDisconnect( evtDisconnect.m_sockID  );
 }
 
 GameLoop::~GameLoop()
