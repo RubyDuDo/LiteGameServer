@@ -68,6 +68,8 @@ target_sources(GameServer
     Utils/json.hpp
     Utils/IDGenerator.cpp 
     Utils/IDGenerator.hpp
+    Utils/TimeService.cpp 
+    Utils/TimeService.hpp
 )
 
 source_group("Utils" FILES
@@ -80,6 +82,8 @@ source_group("Utils" FILES
     Utils/json.hpp
     Utils/IDGenerator.cpp 
     Utils/IDGenerator.hpp
+    Utils/TimeService.cpp 
+    Utils/TimeService.hpp
 )
 
 target_sources(GameServer

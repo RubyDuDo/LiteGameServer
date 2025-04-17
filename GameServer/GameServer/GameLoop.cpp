@@ -172,6 +172,7 @@ void GameLoop::onConnect( const TcpSocket& sock )
 
 void GameLoop::update( const TimePoint& now)
 {
+    m_timeService.update();
     
     //deal network msg
     auto itMsg = m_recvMsgs.try_pop();

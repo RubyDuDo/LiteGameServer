@@ -14,21 +14,18 @@
 #include "Player/PlayerMgr.hpp"
 #include "DB/DBMgr.hpp"
 #include "DBQueryHandler.hpp"
-#include "proto/dbmsg.pb.h"
+
 #include "DataReader/INIReader.hpp"
 
 #include "Network/INetworkMgr.hpp"
 #include "GameNetHelper.hpp"
 #include "../Utils/IDGenerator.hpp"
 #include "../Game/Event.hpp"
+#include "../Game/IMsgRouter.hpp"
 
-using TimePoint = std::chrono::steady_clock::time_point;
 
-class IMsgRouter{
-public:
-    virtual void sendEvent( std::unique_ptr<Event>&& evt ) = 0;
-    virtual ~IMsgRouter() = default;
-};
+#include "../Service/TimeService.hpp"
+
 
 
 class GameLoop : public INetHandler, public IDBResponseHandler, public IMsgRouter
@@ -63,7 +60,7 @@ public:
     
     void dealQueryRole( int sockID, const DBResponse& rsp  );
     
-    void addDBQuery( std::unique_ptr<DBRequest>&& req, std::function<void( const DBResponse&)> func );
+    virtual void addDBQuery( std::unique_ptr<DBRequest>&& req, std::function<void( const DBResponse&)> func ) override;
     
 public:
     
@@ -72,7 +69,7 @@ public:
     virtual void onConnect( const TcpSocket& sock ) ;
     
 //Inner Event
-    void sendEvent( std::unique_ptr<Event>&& evt );
+    virtual void sendEvent( std::unique_ptr<Event>&& evt ) override;
     
     void dealRecvEvent( Event& evt );
     void dealEvtConnect( Event& evt );
@@ -98,6 +95,9 @@ private:
     
     //Inner Event
     MsgQueue< Event > m_innerEvts;
+    
+    //Service
+    CTimeService m_timeService;
     
     
 };
