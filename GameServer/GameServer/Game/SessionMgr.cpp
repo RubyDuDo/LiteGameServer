@@ -121,7 +121,6 @@ TimePoint SessionMgr::getCurTime()
 
 void SessionMgr::refreshHeartbeat( int sockID )
 {
-    SPDLOG_DEBUG("{}", sockID);
     auto it = m_mapSessions.find( sockID );
     if( it != m_mapSessions.end() )
     {

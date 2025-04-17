@@ -40,9 +40,8 @@ public:
 
 private:
     TimePoint getCurTime();
-    
-    
     ITimeService* m_pTimeService;
+public:
     std::map<int, SessionInfo>  m_mapSessions;
     std::map<uint64_t, int>  m_mapRoleToSocks;
 };

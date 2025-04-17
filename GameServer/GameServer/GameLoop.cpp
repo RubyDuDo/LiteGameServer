@@ -149,8 +149,6 @@ bool GameLoop::run()
     SPDLOG_INFO("Stop Run: shut Network End!");
     m_db.shutdownDB();
     
-    heartBeatCheck();
-    
     SPDLOG_INFO("Stop Run End!");
     
     return true;
@@ -221,6 +219,8 @@ void GameLoop::update( const TimePoint& now)
         
         itEvt = m_innerEvts.try_pop();
     }
+    
+    heartBeatCheck();
     
     //todo update gamelogic
 }
@@ -326,19 +326,6 @@ void GameLoop::dealQueryAccount( int sockID, const string& strPasswd, const DBRe
     return ;
 }
 
-void GameLoop::addSession( int sockID, uint64_t roleID )
-{
-    auto it = m_mapSession.find( sockID );
-    if( it != m_mapSession.end() )
-    {
-        m_mapSession.erase( it );
-    }
-    
-    SessionInfo info( sockID, roleID, m_timeService.getCurTime() );
-    m_mapSession.insert( std::make_pair( sockID, info ));
-}
-
-
 void GameLoop::heartBeatCheck()
 {
     static TimePoint lastUpdateTime = m_timeService.getCurTime();
@@ -350,12 +337,14 @@ void GameLoop::heartBeatCheck()
         return;
     }
     
-    for( auto it = m_mapSession.begin(); it != m_mapSession.end(); )
+    for( auto it = m_sessionMgr.m_mapSessions.begin(); it != m_sessionMgr.m_mapSessions.end(); )
     {
         if( curTime - it->second.m_lastHeartbeatTime >=  std::chrono::seconds( m_heartbeatDisconnectInterval) )
         {
-            it = m_mapSession.erase( it );
+            SPDLOG_DEBUG("Disconnect detected by heartbeat:s_{},r_{}", it->first, it->second.m_roleID);
+            it = m_sessionMgr.m_mapSessions.erase( it );
             int64_t roleID = m_sessionMgr.getRoleIDFromSockID( it->first );
+            m_sessionMgr.m_mapRoleToSocks.erase( roleID );
             if( roleID != 0 )
             {
                 m_playerMgr.removePlayer( roleID );

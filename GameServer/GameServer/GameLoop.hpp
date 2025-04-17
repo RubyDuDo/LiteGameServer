@@ -76,8 +76,6 @@ public:
     void dealEvtDisconnect( Event& evt );
     
 private:
-    void addSession( int sockID, uint64_t roleID );
-    
     void heartBeatCheck();
 private:
     PlayerManager m_playerMgr;
@@ -104,10 +102,10 @@ private:
     //Service
     CTimeService m_timeService;
     
-    SessionMgr m_sessionMgr;
+    
     
     //session
-    std::map<int, SessionInfo> m_mapSession;
+    SessionMgr m_sessionMgr;
     int m_heartbeatCheckInterval = 1;
     int m_heartbeatSendInterval = 2;
     int m_heartbeatDisconnectInterval = 10;
