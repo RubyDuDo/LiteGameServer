@@ -7,7 +7,10 @@
 
 #include "TimeService.hpp"
 
-
+CTimeService::CTimeService():m_curTime(std::chrono::steady_clock::now())
+,m_delta(std::chrono::milliseconds::zero())
+{
+}
 void CTimeService::update()
 {
     auto last = m_curTime;

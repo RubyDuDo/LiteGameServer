@@ -26,6 +26,7 @@ public:
 class CTimeService : public ITimeService
 {
 public:
+    CTimeService();
     virtual void update() override;
     virtual TimePoint getCurTime() override;
     virtual TimeDuration getDeltaMS() override;
