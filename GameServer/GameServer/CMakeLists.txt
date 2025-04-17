@@ -27,6 +27,8 @@ target_sources(GameServer
     EventLogs.hpp
     Game/Event.cpp 
     Game/Event.hpp
+    Game/SessionMgr.cpp 
+    Game/SessionMgr.hpp
 )
 source_group("Game" FILES
     GameLoop.cpp
@@ -40,6 +42,8 @@ source_group("Game" FILES
     EventLogs.hpp
     Game/Event.cpp 
     Game/Event.hpp
+    Game/SessionMgr.cpp 
+    Game/SessionMgr.hpp
 )
 
 target_sources(GameServer

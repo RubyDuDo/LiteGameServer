@@ -22,11 +22,10 @@
 #include "../Utils/IDGenerator.hpp"
 #include "../Game/Event.hpp"
 #include "../Game/IMsgRouter.hpp"
+#include "../Game/SessionMgr.hpp"
 
 
-#include "../Service/TimeService.hpp"
-
-
+#include "../Utils/TimeService.hpp"
 
 class GameLoop : public INetHandler, public IDBResponseHandler, public IMsgRouter
 {
@@ -50,6 +49,7 @@ public:
     void dealLogin( int sockID, const Msg& packet );
     void dealAction( int sockID, const Msg& packet );
     void dealLogout( int sockID, const Msg& packet );
+    void dealHeartBeat( int sockID, const Msg& packet );
     
 public:
     virtual void onReceiveDBRsp( int queryID, std::unique_ptr<DBResponse>&& rsp );
@@ -74,6 +74,11 @@ public:
     void dealRecvEvent( Event& evt );
     void dealEvtConnect( Event& evt );
     void dealEvtDisconnect( Event& evt );
+    
+private:
+    void addSession( int sockID, uint64_t roleID );
+    
+    void heartBeatCheck();
 private:
     PlayerManager m_playerMgr;
     
@@ -98,6 +103,14 @@ private:
     
     //Service
     CTimeService m_timeService;
+    
+    SessionMgr m_sessionMgr;
+    
+    //session
+    std::map<int, SessionInfo> m_mapSession;
+    int m_heartbeatCheckInterval = 1;
+    int m_heartbeatSendInterval = 2;
+    int m_heartbeatDisconnectInterval = 10;
     
     
 };

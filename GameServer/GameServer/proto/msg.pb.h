@@ -47,6 +47,9 @@ struct TableStruct_msg_2eproto {
 };
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_msg_2eproto;
 namespace MyGame {
+class ConfigToClient;
+struct ConfigToClientDefaultTypeInternal;
+extern ConfigToClientDefaultTypeInternal _ConfigToClient_default_instance_;
 class Msg;
 struct MsgDefaultTypeInternal;
 extern MsgDefaultTypeInternal _Msg_default_instance_;
@@ -62,6 +65,9 @@ extern MsgRspHeadDefaultTypeInternal _MsgRspHead_default_instance_;
 class RequestAct;
 struct RequestActDefaultTypeInternal;
 extern RequestActDefaultTypeInternal _RequestAct_default_instance_;
+class RequestHeartBeat;
+struct RequestHeartBeatDefaultTypeInternal;
+extern RequestHeartBeatDefaultTypeInternal _RequestHeartBeat_default_instance_;
 class RequestLogin;
 struct RequestLoginDefaultTypeInternal;
 extern RequestLoginDefaultTypeInternal _RequestLogin_default_instance_;
@@ -71,24 +77,34 @@ extern RequestLogoutDefaultTypeInternal _RequestLogout_default_instance_;
 class ResponseAct;
 struct ResponseActDefaultTypeInternal;
 extern ResponseActDefaultTypeInternal _ResponseAct_default_instance_;
+class ResponseHeartBeat;
+struct ResponseHeartBeatDefaultTypeInternal;
+extern ResponseHeartBeatDefaultTypeInternal _ResponseHeartBeat_default_instance_;
 class ResponseLogin;
 struct ResponseLoginDefaultTypeInternal;
 extern ResponseLoginDefaultTypeInternal _ResponseLogin_default_instance_;
 class ResponseLogout;
 struct ResponseLogoutDefaultTypeInternal;
 extern ResponseLogoutDefaultTypeInternal _ResponseLogout_default_instance_;
+class RoleInfo;
+struct RoleInfoDefaultTypeInternal;
+extern RoleInfoDefaultTypeInternal _RoleInfo_default_instance_;
 }  // namespace MyGame
 PROTOBUF_NAMESPACE_OPEN
+template<> ::MyGame::ConfigToClient* Arena::CreateMaybeMessage<::MyGame::ConfigToClient>(Arena*);
 template<> ::MyGame::Msg* Arena::CreateMaybeMessage<::MyGame::Msg>(Arena*);
 template<> ::MyGame::MsgHead* Arena::CreateMaybeMessage<::MyGame::MsgHead>(Arena*);
 template<> ::MyGame::MsgRsp* Arena::CreateMaybeMessage<::MyGame::MsgRsp>(Arena*);
 template<> ::MyGame::MsgRspHead* Arena::CreateMaybeMessage<::MyGame::MsgRspHead>(Arena*);
 template<> ::MyGame::RequestAct* Arena::CreateMaybeMessage<::MyGame::RequestAct>(Arena*);
+template<> ::MyGame::RequestHeartBeat* Arena::CreateMaybeMessage<::MyGame::RequestHeartBeat>(Arena*);
 template<> ::MyGame::RequestLogin* Arena::CreateMaybeMessage<::MyGame::RequestLogin>(Arena*);
 template<> ::MyGame::RequestLogout* Arena::CreateMaybeMessage<::MyGame::RequestLogout>(Arena*);
 template<> ::MyGame::ResponseAct* Arena::CreateMaybeMessage<::MyGame::ResponseAct>(Arena*);
+template<> ::MyGame::ResponseHeartBeat* Arena::CreateMaybeMessage<::MyGame::ResponseHeartBeat>(Arena*);
 template<> ::MyGame::ResponseLogin* Arena::CreateMaybeMessage<::MyGame::ResponseLogin>(Arena*);
 template<> ::MyGame::ResponseLogout* Arena::CreateMaybeMessage<::MyGame::ResponseLogout>(Arena*);
+template<> ::MyGame::RoleInfo* Arena::CreateMaybeMessage<::MyGame::RoleInfo>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace MyGame {
 
@@ -97,12 +113,13 @@ enum MsgType : int {
   MsgType_Login = 1,
   MsgType_Logout = 2,
   MsgType_Act = 3,
+  MsgType_HeartBeat = 4,
   MsgType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   MsgType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
 bool MsgType_IsValid(int value);
 constexpr MsgType MsgType_MIN = MsgType_Default;
-constexpr MsgType MsgType_MAX = MsgType_Act;
+constexpr MsgType MsgType_MAX = MsgType_HeartBeat;
 constexpr int MsgType_ARRAYSIZE = MsgType_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* MsgType_descriptor();
@@ -609,6 +626,303 @@ class RequestLogin final :
 };
 // -------------------------------------------------------------------
 
+class RoleInfo final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:MyGame.RoleInfo) */ {
+ public:
+  inline RoleInfo() : RoleInfo(nullptr) {}
+  ~RoleInfo() override;
+  explicit PROTOBUF_CONSTEXPR RoleInfo(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RoleInfo(const RoleInfo& from);
+  RoleInfo(RoleInfo&& from) noexcept
+    : RoleInfo() {
+    *this = ::std::move(from);
+  }
+
+  inline RoleInfo& operator=(const RoleInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RoleInfo& operator=(RoleInfo&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const RoleInfo& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RoleInfo* internal_default_instance() {
+    return reinterpret_cast<const RoleInfo*>(
+               &_RoleInfo_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    3;
+
+  friend void swap(RoleInfo& a, RoleInfo& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RoleInfo* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RoleInfo* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  RoleInfo* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<RoleInfo>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const RoleInfo& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const RoleInfo& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RoleInfo* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "MyGame.RoleInfo";
+  }
+  protected:
+  explicit RoleInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kRoleIdFieldNumber = 1,
+    kRoleLevelFieldNumber = 2,
+  };
+  // uint64 roleId = 1;
+  void clear_roleid();
+  uint64_t roleid() const;
+  void set_roleid(uint64_t value);
+  private:
+  uint64_t _internal_roleid() const;
+  void _internal_set_roleid(uint64_t value);
+  public:
+
+  // int32 roleLevel = 2;
+  void clear_rolelevel();
+  int32_t rolelevel() const;
+  void set_rolelevel(int32_t value);
+  private:
+  int32_t _internal_rolelevel() const;
+  void _internal_set_rolelevel(int32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:MyGame.RoleInfo)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  uint64_t roleid_;
+  int32_t rolelevel_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_msg_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ConfigToClient final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:MyGame.ConfigToClient) */ {
+ public:
+  inline ConfigToClient() : ConfigToClient(nullptr) {}
+  ~ConfigToClient() override;
+  explicit PROTOBUF_CONSTEXPR ConfigToClient(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ConfigToClient(const ConfigToClient& from);
+  ConfigToClient(ConfigToClient&& from) noexcept
+    : ConfigToClient() {
+    *this = ::std::move(from);
+  }
+
+  inline ConfigToClient& operator=(const ConfigToClient& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ConfigToClient& operator=(ConfigToClient&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ConfigToClient& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ConfigToClient* internal_default_instance() {
+    return reinterpret_cast<const ConfigToClient*>(
+               &_ConfigToClient_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    4;
+
+  friend void swap(ConfigToClient& a, ConfigToClient& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ConfigToClient* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ConfigToClient* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ConfigToClient* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<ConfigToClient>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const ConfigToClient& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const ConfigToClient& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ConfigToClient* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "MyGame.ConfigToClient";
+  }
+  protected:
+  explicit ConfigToClient(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kHeartbeatSendIntervalFieldNumber = 1,
+  };
+  // int32 heartbeatSendInterval = 1;
+  void clear_heartbeatsendinterval();
+  int32_t heartbeatsendinterval() const;
+  void set_heartbeatsendinterval(int32_t value);
+  private:
+  int32_t _internal_heartbeatsendinterval() const;
+  void _internal_set_heartbeatsendinterval(int32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:MyGame.ConfigToClient)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  int32_t heartbeatsendinterval_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_msg_2eproto;
+};
+// -------------------------------------------------------------------
+
 class ResponseLogin final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:MyGame.ResponseLogin) */ {
  public:
@@ -657,7 +971,7 @@ class ResponseLogin final :
                &_ResponseLogin_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    5;
 
   friend void swap(ResponseLogin& a, ResponseLogin& b) {
     a.Swap(&b);
@@ -728,26 +1042,44 @@ class ResponseLogin final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kRoleIdFieldNumber = 1,
-    kRoleLevelFieldNumber = 2,
+    kRoleInfoFieldNumber = 1,
+    kConfigInfoFieldNumber = 2,
   };
-  // uint64 roleId = 1;
-  void clear_roleid();
-  uint64_t roleid() const;
-  void set_roleid(uint64_t value);
+  // .MyGame.RoleInfo roleInfo = 1;
+  bool has_roleinfo() const;
   private:
-  uint64_t _internal_roleid() const;
-  void _internal_set_roleid(uint64_t value);
+  bool _internal_has_roleinfo() const;
   public:
+  void clear_roleinfo();
+  const ::MyGame::RoleInfo& roleinfo() const;
+  PROTOBUF_NODISCARD ::MyGame::RoleInfo* release_roleinfo();
+  ::MyGame::RoleInfo* mutable_roleinfo();
+  void set_allocated_roleinfo(::MyGame::RoleInfo* roleinfo);
+  private:
+  const ::MyGame::RoleInfo& _internal_roleinfo() const;
+  ::MyGame::RoleInfo* _internal_mutable_roleinfo();
+  public:
+  void unsafe_arena_set_allocated_roleinfo(
+      ::MyGame::RoleInfo* roleinfo);
+  ::MyGame::RoleInfo* unsafe_arena_release_roleinfo();
 
-  // int32 roleLevel = 2;
-  void clear_rolelevel();
-  int32_t rolelevel() const;
-  void set_rolelevel(int32_t value);
+  // .MyGame.ConfigToClient configInfo = 2;
+  bool has_configinfo() const;
   private:
-  int32_t _internal_rolelevel() const;
-  void _internal_set_rolelevel(int32_t value);
+  bool _internal_has_configinfo() const;
   public:
+  void clear_configinfo();
+  const ::MyGame::ConfigToClient& configinfo() const;
+  PROTOBUF_NODISCARD ::MyGame::ConfigToClient* release_configinfo();
+  ::MyGame::ConfigToClient* mutable_configinfo();
+  void set_allocated_configinfo(::MyGame::ConfigToClient* configinfo);
+  private:
+  const ::MyGame::ConfigToClient& _internal_configinfo() const;
+  ::MyGame::ConfigToClient* _internal_mutable_configinfo();
+  public:
+  void unsafe_arena_set_allocated_configinfo(
+      ::MyGame::ConfigToClient* configinfo);
+  ::MyGame::ConfigToClient* unsafe_arena_release_configinfo();
 
   // @@protoc_insertion_point(class_scope:MyGame.ResponseLogin)
  private:
@@ -756,8 +1088,8 @@ class ResponseLogin final :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  uint64_t roleid_;
-  int32_t rolelevel_;
+  ::MyGame::RoleInfo* roleinfo_;
+  ::MyGame::ConfigToClient* configinfo_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_msg_2eproto;
 };
@@ -811,7 +1143,7 @@ class RequestLogout final :
                &_RequestLogout_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    6;
 
   friend void swap(RequestLogout& a, RequestLogout& b) {
     a.Swap(&b);
@@ -954,7 +1286,7 @@ class ResponseLogout final :
                &_ResponseLogout_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    7;
 
   friend void swap(ResponseLogout& a, ResponseLogout& b) {
     a.Swap(&b);
@@ -1097,7 +1429,7 @@ class RequestAct final :
                &_RequestAct_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    8;
 
   friend void swap(RequestAct& a, RequestAct& b) {
     a.Swap(&b);
@@ -1245,7 +1577,7 @@ class ResponseAct final :
                &_ResponseAct_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    9;
 
   friend void swap(ResponseAct& a, ResponseAct& b) {
     a.Swap(&b);
@@ -1345,6 +1677,292 @@ class ResponseAct final :
 };
 // -------------------------------------------------------------------
 
+class RequestHeartBeat final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:MyGame.RequestHeartBeat) */ {
+ public:
+  inline RequestHeartBeat() : RequestHeartBeat(nullptr) {}
+  ~RequestHeartBeat() override;
+  explicit PROTOBUF_CONSTEXPR RequestHeartBeat(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RequestHeartBeat(const RequestHeartBeat& from);
+  RequestHeartBeat(RequestHeartBeat&& from) noexcept
+    : RequestHeartBeat() {
+    *this = ::std::move(from);
+  }
+
+  inline RequestHeartBeat& operator=(const RequestHeartBeat& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RequestHeartBeat& operator=(RequestHeartBeat&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const RequestHeartBeat& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RequestHeartBeat* internal_default_instance() {
+    return reinterpret_cast<const RequestHeartBeat*>(
+               &_RequestHeartBeat_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    10;
+
+  friend void swap(RequestHeartBeat& a, RequestHeartBeat& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RequestHeartBeat* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RequestHeartBeat* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  RequestHeartBeat* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<RequestHeartBeat>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const RequestHeartBeat& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const RequestHeartBeat& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RequestHeartBeat* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "MyGame.RequestHeartBeat";
+  }
+  protected:
+  explicit RequestHeartBeat(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kRoleIdFieldNumber = 1,
+  };
+  // uint64 roleId = 1;
+  void clear_roleid();
+  uint64_t roleid() const;
+  void set_roleid(uint64_t value);
+  private:
+  uint64_t _internal_roleid() const;
+  void _internal_set_roleid(uint64_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:MyGame.RequestHeartBeat)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  uint64_t roleid_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_msg_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ResponseHeartBeat final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:MyGame.ResponseHeartBeat) */ {
+ public:
+  inline ResponseHeartBeat() : ResponseHeartBeat(nullptr) {}
+  ~ResponseHeartBeat() override;
+  explicit PROTOBUF_CONSTEXPR ResponseHeartBeat(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ResponseHeartBeat(const ResponseHeartBeat& from);
+  ResponseHeartBeat(ResponseHeartBeat&& from) noexcept
+    : ResponseHeartBeat() {
+    *this = ::std::move(from);
+  }
+
+  inline ResponseHeartBeat& operator=(const ResponseHeartBeat& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ResponseHeartBeat& operator=(ResponseHeartBeat&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ResponseHeartBeat& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ResponseHeartBeat* internal_default_instance() {
+    return reinterpret_cast<const ResponseHeartBeat*>(
+               &_ResponseHeartBeat_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    11;
+
+  friend void swap(ResponseHeartBeat& a, ResponseHeartBeat& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ResponseHeartBeat* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ResponseHeartBeat* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ResponseHeartBeat* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<ResponseHeartBeat>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const ResponseHeartBeat& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const ResponseHeartBeat& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ResponseHeartBeat* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "MyGame.ResponseHeartBeat";
+  }
+  protected:
+  explicit ResponseHeartBeat(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kRoleIDFieldNumber = 1,
+  };
+  // uint64 roleID = 1;
+  void clear_roleid();
+  uint64_t roleid() const;
+  void set_roleid(uint64_t value);
+  private:
+  uint64_t _internal_roleid() const;
+  void _internal_set_roleid(uint64_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:MyGame.ResponseHeartBeat)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  uint64_t roleid_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_msg_2eproto;
+};
+// -------------------------------------------------------------------
+
 class Msg final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:MyGame.Msg) */ {
  public:
@@ -1393,7 +2011,7 @@ class Msg final :
                &_Msg_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    12;
 
   friend void swap(Msg& a, Msg& b) {
     a.Swap(&b);
@@ -1565,7 +2183,7 @@ class MsgRsp final :
                &_MsgRsp_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    13;
 
   friend void swap(MsgRsp& a, MsgRsp& b) {
     a.Swap(&b);
@@ -1868,46 +2486,254 @@ inline void RequestLogin::set_allocated_strpass(std::string* strpass) {
 
 // -------------------------------------------------------------------
 
-// ResponseLogin
+// RoleInfo
 
 // uint64 roleId = 1;
-inline void ResponseLogin::clear_roleid() {
+inline void RoleInfo::clear_roleid() {
   roleid_ = uint64_t{0u};
 }
-inline uint64_t ResponseLogin::_internal_roleid() const {
+inline uint64_t RoleInfo::_internal_roleid() const {
   return roleid_;
 }
-inline uint64_t ResponseLogin::roleid() const {
-  // @@protoc_insertion_point(field_get:MyGame.ResponseLogin.roleId)
+inline uint64_t RoleInfo::roleid() const {
+  // @@protoc_insertion_point(field_get:MyGame.RoleInfo.roleId)
   return _internal_roleid();
 }
-inline void ResponseLogin::_internal_set_roleid(uint64_t value) {
+inline void RoleInfo::_internal_set_roleid(uint64_t value) {
   
   roleid_ = value;
 }
-inline void ResponseLogin::set_roleid(uint64_t value) {
+inline void RoleInfo::set_roleid(uint64_t value) {
   _internal_set_roleid(value);
-  // @@protoc_insertion_point(field_set:MyGame.ResponseLogin.roleId)
+  // @@protoc_insertion_point(field_set:MyGame.RoleInfo.roleId)
 }
 
 // int32 roleLevel = 2;
-inline void ResponseLogin::clear_rolelevel() {
+inline void RoleInfo::clear_rolelevel() {
   rolelevel_ = 0;
 }
-inline int32_t ResponseLogin::_internal_rolelevel() const {
+inline int32_t RoleInfo::_internal_rolelevel() const {
   return rolelevel_;
 }
-inline int32_t ResponseLogin::rolelevel() const {
-  // @@protoc_insertion_point(field_get:MyGame.ResponseLogin.roleLevel)
+inline int32_t RoleInfo::rolelevel() const {
+  // @@protoc_insertion_point(field_get:MyGame.RoleInfo.roleLevel)
   return _internal_rolelevel();
 }
-inline void ResponseLogin::_internal_set_rolelevel(int32_t value) {
+inline void RoleInfo::_internal_set_rolelevel(int32_t value) {
   
   rolelevel_ = value;
 }
-inline void ResponseLogin::set_rolelevel(int32_t value) {
+inline void RoleInfo::set_rolelevel(int32_t value) {
   _internal_set_rolelevel(value);
-  // @@protoc_insertion_point(field_set:MyGame.ResponseLogin.roleLevel)
+  // @@protoc_insertion_point(field_set:MyGame.RoleInfo.roleLevel)
+}
+
+// -------------------------------------------------------------------
+
+// ConfigToClient
+
+// int32 heartbeatSendInterval = 1;
+inline void ConfigToClient::clear_heartbeatsendinterval() {
+  heartbeatsendinterval_ = 0;
+}
+inline int32_t ConfigToClient::_internal_heartbeatsendinterval() const {
+  return heartbeatsendinterval_;
+}
+inline int32_t ConfigToClient::heartbeatsendinterval() const {
+  // @@protoc_insertion_point(field_get:MyGame.ConfigToClient.heartbeatSendInterval)
+  return _internal_heartbeatsendinterval();
+}
+inline void ConfigToClient::_internal_set_heartbeatsendinterval(int32_t value) {
+  
+  heartbeatsendinterval_ = value;
+}
+inline void ConfigToClient::set_heartbeatsendinterval(int32_t value) {
+  _internal_set_heartbeatsendinterval(value);
+  // @@protoc_insertion_point(field_set:MyGame.ConfigToClient.heartbeatSendInterval)
+}
+
+// -------------------------------------------------------------------
+
+// ResponseLogin
+
+// .MyGame.RoleInfo roleInfo = 1;
+inline bool ResponseLogin::_internal_has_roleinfo() const {
+  return this != internal_default_instance() && roleinfo_ != nullptr;
+}
+inline bool ResponseLogin::has_roleinfo() const {
+  return _internal_has_roleinfo();
+}
+inline void ResponseLogin::clear_roleinfo() {
+  if (GetArenaForAllocation() == nullptr && roleinfo_ != nullptr) {
+    delete roleinfo_;
+  }
+  roleinfo_ = nullptr;
+}
+inline const ::MyGame::RoleInfo& ResponseLogin::_internal_roleinfo() const {
+  const ::MyGame::RoleInfo* p = roleinfo_;
+  return p != nullptr ? *p : reinterpret_cast<const ::MyGame::RoleInfo&>(
+      ::MyGame::_RoleInfo_default_instance_);
+}
+inline const ::MyGame::RoleInfo& ResponseLogin::roleinfo() const {
+  // @@protoc_insertion_point(field_get:MyGame.ResponseLogin.roleInfo)
+  return _internal_roleinfo();
+}
+inline void ResponseLogin::unsafe_arena_set_allocated_roleinfo(
+    ::MyGame::RoleInfo* roleinfo) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(roleinfo_);
+  }
+  roleinfo_ = roleinfo;
+  if (roleinfo) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:MyGame.ResponseLogin.roleInfo)
+}
+inline ::MyGame::RoleInfo* ResponseLogin::release_roleinfo() {
+  
+  ::MyGame::RoleInfo* temp = roleinfo_;
+  roleinfo_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::MyGame::RoleInfo* ResponseLogin::unsafe_arena_release_roleinfo() {
+  // @@protoc_insertion_point(field_release:MyGame.ResponseLogin.roleInfo)
+  
+  ::MyGame::RoleInfo* temp = roleinfo_;
+  roleinfo_ = nullptr;
+  return temp;
+}
+inline ::MyGame::RoleInfo* ResponseLogin::_internal_mutable_roleinfo() {
+  
+  if (roleinfo_ == nullptr) {
+    auto* p = CreateMaybeMessage<::MyGame::RoleInfo>(GetArenaForAllocation());
+    roleinfo_ = p;
+  }
+  return roleinfo_;
+}
+inline ::MyGame::RoleInfo* ResponseLogin::mutable_roleinfo() {
+  ::MyGame::RoleInfo* _msg = _internal_mutable_roleinfo();
+  // @@protoc_insertion_point(field_mutable:MyGame.ResponseLogin.roleInfo)
+  return _msg;
+}
+inline void ResponseLogin::set_allocated_roleinfo(::MyGame::RoleInfo* roleinfo) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete roleinfo_;
+  }
+  if (roleinfo) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(roleinfo);
+    if (message_arena != submessage_arena) {
+      roleinfo = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, roleinfo, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  roleinfo_ = roleinfo;
+  // @@protoc_insertion_point(field_set_allocated:MyGame.ResponseLogin.roleInfo)
+}
+
+// .MyGame.ConfigToClient configInfo = 2;
+inline bool ResponseLogin::_internal_has_configinfo() const {
+  return this != internal_default_instance() && configinfo_ != nullptr;
+}
+inline bool ResponseLogin::has_configinfo() const {
+  return _internal_has_configinfo();
+}
+inline void ResponseLogin::clear_configinfo() {
+  if (GetArenaForAllocation() == nullptr && configinfo_ != nullptr) {
+    delete configinfo_;
+  }
+  configinfo_ = nullptr;
+}
+inline const ::MyGame::ConfigToClient& ResponseLogin::_internal_configinfo() const {
+  const ::MyGame::ConfigToClient* p = configinfo_;
+  return p != nullptr ? *p : reinterpret_cast<const ::MyGame::ConfigToClient&>(
+      ::MyGame::_ConfigToClient_default_instance_);
+}
+inline const ::MyGame::ConfigToClient& ResponseLogin::configinfo() const {
+  // @@protoc_insertion_point(field_get:MyGame.ResponseLogin.configInfo)
+  return _internal_configinfo();
+}
+inline void ResponseLogin::unsafe_arena_set_allocated_configinfo(
+    ::MyGame::ConfigToClient* configinfo) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(configinfo_);
+  }
+  configinfo_ = configinfo;
+  if (configinfo) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:MyGame.ResponseLogin.configInfo)
+}
+inline ::MyGame::ConfigToClient* ResponseLogin::release_configinfo() {
+  
+  ::MyGame::ConfigToClient* temp = configinfo_;
+  configinfo_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::MyGame::ConfigToClient* ResponseLogin::unsafe_arena_release_configinfo() {
+  // @@protoc_insertion_point(field_release:MyGame.ResponseLogin.configInfo)
+  
+  ::MyGame::ConfigToClient* temp = configinfo_;
+  configinfo_ = nullptr;
+  return temp;
+}
+inline ::MyGame::ConfigToClient* ResponseLogin::_internal_mutable_configinfo() {
+  
+  if (configinfo_ == nullptr) {
+    auto* p = CreateMaybeMessage<::MyGame::ConfigToClient>(GetArenaForAllocation());
+    configinfo_ = p;
+  }
+  return configinfo_;
+}
+inline ::MyGame::ConfigToClient* ResponseLogin::mutable_configinfo() {
+  ::MyGame::ConfigToClient* _msg = _internal_mutable_configinfo();
+  // @@protoc_insertion_point(field_mutable:MyGame.ResponseLogin.configInfo)
+  return _msg;
+}
+inline void ResponseLogin::set_allocated_configinfo(::MyGame::ConfigToClient* configinfo) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete configinfo_;
+  }
+  if (configinfo) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(configinfo);
+    if (message_arena != submessage_arena) {
+      configinfo = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, configinfo, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  configinfo_ = configinfo;
+  // @@protoc_insertion_point(field_set_allocated:MyGame.ResponseLogin.configInfo)
 }
 
 // -------------------------------------------------------------------
@@ -2064,6 +2890,54 @@ inline void ResponseAct::set_allocated_action(std::string* action) {
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:MyGame.ResponseAct.action)
+}
+
+// -------------------------------------------------------------------
+
+// RequestHeartBeat
+
+// uint64 roleId = 1;
+inline void RequestHeartBeat::clear_roleid() {
+  roleid_ = uint64_t{0u};
+}
+inline uint64_t RequestHeartBeat::_internal_roleid() const {
+  return roleid_;
+}
+inline uint64_t RequestHeartBeat::roleid() const {
+  // @@protoc_insertion_point(field_get:MyGame.RequestHeartBeat.roleId)
+  return _internal_roleid();
+}
+inline void RequestHeartBeat::_internal_set_roleid(uint64_t value) {
+  
+  roleid_ = value;
+}
+inline void RequestHeartBeat::set_roleid(uint64_t value) {
+  _internal_set_roleid(value);
+  // @@protoc_insertion_point(field_set:MyGame.RequestHeartBeat.roleId)
+}
+
+// -------------------------------------------------------------------
+
+// ResponseHeartBeat
+
+// uint64 roleID = 1;
+inline void ResponseHeartBeat::clear_roleid() {
+  roleid_ = uint64_t{0u};
+}
+inline uint64_t ResponseHeartBeat::_internal_roleid() const {
+  return roleid_;
+}
+inline uint64_t ResponseHeartBeat::roleid() const {
+  // @@protoc_insertion_point(field_get:MyGame.ResponseHeartBeat.roleID)
+  return _internal_roleid();
+}
+inline void ResponseHeartBeat::_internal_set_roleid(uint64_t value) {
+  
+  roleid_ = value;
+}
+inline void ResponseHeartBeat::set_roleid(uint64_t value) {
+  _internal_set_roleid(value);
+  // @@protoc_insertion_point(field_set:MyGame.ResponseHeartBeat.roleID)
 }
 
 // -------------------------------------------------------------------
@@ -2427,6 +3301,14 @@ inline void MsgRsp::set_allocated_payload(::PROTOBUF_NAMESPACE_ID::Any* payload)
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

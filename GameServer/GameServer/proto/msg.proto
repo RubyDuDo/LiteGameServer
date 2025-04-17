@@ -8,6 +8,7 @@ enum MsgType
     MsgType_Login = 1;
     MsgType_Logout = 2;
     MsgType_Act = 3;
+    MsgType_HeartBeat = 4;
 }
 
 enum MsgErrCode
@@ -35,10 +36,19 @@ message RequestLogin
     string strPass = 2;
 }
 
-message ResponseLogin
+message RoleInfo
 {
     uint64 roleId = 1;
     int32 roleLevel = 2;
+}
+message ConfigToClient
+{
+    int32 heartbeatSendInterval = 1;
+}
+message ResponseLogin
+{
+    RoleInfo roleInfo = 1;
+    ConfigToClient configInfo = 2;
 }
 
 message RequestLogout
@@ -61,11 +71,23 @@ message ResponseAct
     string action = 1;
 }
 
+message RequestHeartBeat
+{
+    uint64 roleId = 1;
+}
+
+message ResponseHeartBeat
+{
+    uint64 roleID = 1;    
+}
+
 message Msg
 {
     MsgHead head = 1;
     google.protobuf.Any payload = 2;
 }
+
+
 
 message MsgRsp
 {

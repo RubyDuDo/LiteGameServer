@@ -26,10 +26,16 @@ const string DB_PASSWD_DEF = "111111";
 const string DB_NAME_DEF = "MyGame";
 const int  ServerID_DEF = 1024;
 
+const int HEARTBEAT_CHECK_INTERVAl_DEF = 1;
+const int HEARTBEAT_SEND_INTERVAl_DEF = 2;
+const int HEARTBEAT_DISCONNECT_INTERVAL_DEF = 10;
+
 const string LOG_TYPE_DEF = "basic";
 const string LOG_PATH_DEF = "logs/app_basic.log";
 
 constexpr string config_dir = "./config.ini";
+
+
 bool GameLoop::Init()
 {
     int res = m_config.ParseFile( config_dir );
@@ -93,6 +99,11 @@ bool GameLoop::Init()
         SPDLOG_ERROR("PlayerManager init failed!");
     }
     
+    m_heartbeatCheckInterval = m_config.getInt("HeartBeat","check_interval",HEARTBEAT_CHECK_INTERVAl_DEF);
+    m_heartbeatSendInterval = m_config.getInt("HeartBeat","send_interval", HEARTBEAT_SEND_INTERVAl_DEF);
+    m_heartbeatDisconnectInterval = m_config.getInt("HeartBeat","disconnect_interval", HEARTBEAT_DISCONNECT_INTERVAL_DEF );
+    m_sessionMgr.setTimeService( &m_timeService );
+    
     m_bRunning = true;
     
     return ret;
@@ -137,6 +148,8 @@ bool GameLoop::run()
     INetworkMgr::getInstance()->shutdownNetwork();
     SPDLOG_INFO("Stop Run: shut Network End!");
     m_db.shutdownDB();
+    
+    heartBeatCheck();
     
     SPDLOG_INFO("Stop Run End!");
     
@@ -313,6 +326,47 @@ void GameLoop::dealQueryAccount( int sockID, const string& strPasswd, const DBRe
     return ;
 }
 
+void GameLoop::addSession( int sockID, uint64_t roleID )
+{
+    auto it = m_mapSession.find( sockID );
+    if( it != m_mapSession.end() )
+    {
+        m_mapSession.erase( it );
+    }
+    
+    SessionInfo info( sockID, roleID, m_timeService.getCurTime() );
+    m_mapSession.insert( std::make_pair( sockID, info ));
+}
+
+
+void GameLoop::heartBeatCheck()
+{
+    static TimePoint lastUpdateTime = m_timeService.getCurTime();
+    auto curTime = m_timeService.getCurTime();
+    
+    auto duration = curTime - lastUpdateTime;
+    if( duration < std::chrono::seconds( m_heartbeatCheckInterval ) )
+    {
+        return;
+    }
+    
+    for( auto it = m_mapSession.begin(); it != m_mapSession.end(); )
+    {
+        if( curTime - it->second.m_lastHeartbeatTime >=  std::chrono::seconds( m_heartbeatDisconnectInterval) )
+        {
+            it = m_mapSession.erase( it );
+            int64_t roleID = m_sessionMgr.getRoleIDFromSockID( it->first );
+            if( roleID != 0 )
+            {
+                m_playerMgr.removePlayer( roleID );
+            }
+            INetworkMgr::getInstance()->closeSock( it->first );
+        }
+        else{
+            ++it;
+        }
+    }
+}
 void GameLoop::dealAddRole( int sockID, const DBResponse& rsp )
 {
     if( rsp.head().res() == DBErr_Fail )
@@ -335,9 +389,12 @@ void GameLoop::dealAddRole( int sockID, const DBResponse& rsp )
     
     m_playerMgr.addPlayer( sockID,  query.name() ,  query.roleid(),  query.level() );
     
+    m_sessionMgr.addSessionInfo( sockID,  query.roleid() );
+    
     ResponseLogin rspLogin;
-    rspLogin.set_roleid( query.roleid() );
-    rspLogin.set_rolelevel( query.level() );
+    rspLogin.mutable_roleinfo()->set_roleid( query.roleid() );
+    rspLogin.mutable_roleinfo()->set_rolelevel( query.level() );
+    rspLogin.mutable_configinfo()->set_heartbeatsendinterval( m_heartbeatSendInterval );
     NetSendHelper::addTcpQueue( sockID, MsgType_Login, MsgErr_OK, rspLogin);
     
     EventLogs::getInstance()->onEventLogin( MsgErr_OK, query.roleid());
@@ -366,10 +423,12 @@ void GameLoop::dealQueryRole( int sockID, const DBResponse& rsp  )
     }
     
     m_playerMgr.addPlayer( sockID,  query.name() ,  query.roleid(),  query.level() );
+    m_sessionMgr.addSessionInfo( sockID,  query.roleid() );
     
     ResponseLogin rspLogin;
-    rspLogin.set_roleid( query.roleid() );
-    rspLogin.set_rolelevel( query.level() );
+    rspLogin.mutable_roleinfo()->set_roleid( query.roleid() );
+    rspLogin.mutable_roleinfo()->set_rolelevel( query.level() );
+    rspLogin.mutable_configinfo()->set_heartbeatsendinterval( m_heartbeatSendInterval );
     NetSendHelper::addTcpQueue( sockID, MsgType_Login, MsgErr_OK, rspLogin);
     
     EventLogs::getInstance()->onEventLogin(MsgErr_OK,  query.roleid());
@@ -394,6 +453,9 @@ void GameLoop::dealReceiveMsg( int sockID, const Msg& packet )
             break;
         case MsgType_Logout:
             dealLogout( sockID, packet );
+            break;
+        case MsgType_HeartBeat:
+            dealHeartBeat( sockID, packet );
             break;
         default:
             break;
@@ -434,7 +496,7 @@ void GameLoop::dealAction( int sockID, const Msg& msg )
 
     SPDLOG_DEBUG("Receive Act {}", act.action());
     
-    if( !m_playerMgr.isPlayerOnline( m_playerMgr.getPlayerIDFromSock( sockID ) ))
+    if( !m_playerMgr.isPlayerOnline( m_sessionMgr.getRoleIDFromSockID( sockID ) ))
     {
         SPDLOG_WARN("This player is not online");
         return;
@@ -459,9 +521,38 @@ void GameLoop::dealLogout( int sockID, const Msg& msg )
     
     SPDLOG_INFO("Receive Logout {}, sock:{}", logout.roleid(), sockID );
     
-    m_playerMgr.onPlayerLogout( sockID, logout.roleid() );
+    auto roleID = logout.roleid() ;
+    if( !m_sessionMgr.isMatchSockAndRole(sockID, roleID ) )
+    {
+        SPDLOG_ERROR("Mismatch sockID roleID:{},{}", sockID, roleID );
+        return;
+    }
+
+    m_playerMgr.removePlayer( roleID );
+    
+    ResponseLogout rsp;
+    rsp.set_roleid( roleID );
+    
+    NetSendHelper::addTcpQueue( sockID,MsgType_Logout, MsgErr_OK,  rsp);
+    EventLogs::getInstance()->onEventLogout( MsgErr_OK, roleID );
+    
+    m_sessionMgr.removeSession( sockID );
 
     INetworkMgr::getInstance()->closeSock( sockID );
+}
+
+void GameLoop::dealHeartBeat( int sockID, const Msg& msg )
+{
+    RequestHeartBeat heartbeat;
+    if( !msg.payload().UnpackTo( &heartbeat ) )
+    {
+        SPDLOG_WARN("Parse Logout fail");
+        return;
+    }
+    
+    m_sessionMgr.refreshHeartbeat( sockID );
+    
+    SPDLOG_TRACE("Receive HeartBeat roleid:{}, sock:{}", heartbeat.roleid(), sockID );
 }
 
 void GameLoop::sendEvent( std::unique_ptr<Event>&& evt )
@@ -496,7 +587,12 @@ void GameLoop::dealEvtDisconnect( Event& evt )
     EventDisconnect& evtDisconnect = static_cast<EventDisconnect&>(evt);
     //there should remove the player
     
-    m_playerMgr.onSockDisconnect( evtDisconnect.m_sockID  );
+    int64_t roleID = m_sessionMgr.getRoleIDFromSockID( evtDisconnect.m_sockID );
+    if( roleID != 0 )
+    {
+        m_playerMgr.removePlayer( roleID );
+    }
+    m_sessionMgr.removeSession( evtDisconnect.m_sockID );
 }
 
 GameLoop::~GameLoop()
