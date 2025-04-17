@@ -93,6 +93,15 @@ uint64_t PlayerManager::getPlayerIDFromSock( int sockID )
     }
 }
 
+void PlayerManager::onSockDisconnect( int sockID )
+{
+    int64_t roleID = getPlayerIDFromSock( sockID );
+    if( roleID != 0 )
+    {
+        removePlayer( roleID );
+    }
+}
+
 Player* PlayerManager::getPlayer( uint64_t roleID )
 {
     auto it = m_mapPlayers.find( roleID );
@@ -108,6 +117,7 @@ Player* PlayerManager::getPlayer( uint64_t roleID )
 
 void PlayerManager::removePlayer( uint64_t roleID )
 {
+    SPDLOG_DEBUG("removePlayer:{}", roleID );
     m_mapPlayers.erase( roleID );
     
     int sockID = m_mapRoleToSock[roleID];

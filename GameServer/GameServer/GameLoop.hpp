@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <chrono>
+#include <memory>
 #include "Player/PlayerMgr.hpp"
 #include "DB/DBMgr.hpp"
 #include "DBQueryHandler.hpp"
@@ -19,11 +20,18 @@
 #include "Network/INetworkMgr.hpp"
 #include "GameNetHelper.hpp"
 #include "../Utils/IDGenerator.hpp"
+#include "../Game/Event.hpp"
 
 using TimePoint = std::chrono::steady_clock::time_point;
 
+class IMsgRouter{
+public:
+    virtual void sendEvent( std::unique_ptr<Event>&& evt ) = 0;
+    virtual ~IMsgRouter() = default;
+};
 
-class GameLoop : public INetHandler, public IDBResponseHandler
+
+class GameLoop : public INetHandler, public IDBResponseHandler, public IMsgRouter
 {
 public:
     bool Init();
@@ -63,6 +71,12 @@ public:
     virtual void onDisconnect( int fd ) ;
     virtual void onConnect( const TcpSocket& sock ) ;
     
+//Inner Event
+    void sendEvent( std::unique_ptr<Event>&& evt );
+    
+    void dealRecvEvent( Event& evt );
+    void dealEvtConnect( Event& evt );
+    void dealEvtDisconnect( Event& evt );
 private:
     PlayerManager m_playerMgr;
     
@@ -81,6 +95,9 @@ private:
     std::atomic<bool> m_bRunning = false;
     
     IDGenerator m_idGen;
+    
+    //Inner Event
+    MsgQueue< Event > m_innerEvts;
     
     
 };

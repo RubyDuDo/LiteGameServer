@@ -22,6 +22,7 @@ public:
     bool init( );
     void addPlayer( int sockID, const string& strName, uint64_t roleid, int level );
     void onPlayerLogout( int sockID, uint64_t roleID );
+    void onSockDisconnect( int sockID );
     
     bool isPlayerOnline( uint64_t roleID );
     uint64_t getPlayerIDFromSock( int sockID );
