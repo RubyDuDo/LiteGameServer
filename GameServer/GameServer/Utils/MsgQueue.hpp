@@ -19,6 +19,7 @@ class MsgQueue
 {
 public:
     void push( T&& value );
+    void push( std::unique_ptr<T>&& value);
     
     unique_ptr<T> try_pop();
     unique_ptr<T> wait_and_pop();
@@ -46,6 +47,16 @@ void MsgQueue<T>::push(  T&& value )
         m_queue.push( std::make_unique<T>(std::move(value)) );
     }
 
+    m_cond.notify_one();
+}
+
+template <typename T>
+void MsgQueue<T>::push( std::unique_ptr<T>&& value)
+{
+    {
+        lock_guard lk(m_mut);
+        m_queue.push( value );
+    }
     m_cond.notify_one();
 }
 
