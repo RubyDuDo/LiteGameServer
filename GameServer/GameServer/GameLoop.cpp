@@ -102,7 +102,6 @@ bool GameLoop::Init()
     m_heartbeatCheckInterval = m_config.getInt("HeartBeat","check_interval",HEARTBEAT_CHECK_INTERVAl_DEF);
     m_heartbeatSendInterval = m_config.getInt("HeartBeat","send_interval", HEARTBEAT_SEND_INTERVAl_DEF);
     m_heartbeatDisconnectInterval = m_config.getInt("HeartBeat","disconnect_interval", HEARTBEAT_DISCONNECT_INTERVAL_DEF );
-    m_sessionMgr.setTimeService( &m_timeService );
     
     m_bRunning = true;
     
@@ -337,23 +336,43 @@ void GameLoop::heartBeatCheck()
         return;
     }
     
-    for( auto it = m_sessionMgr.m_mapSessions.begin(); it != m_sessionMgr.m_mapSessions.end(); )
+    auto vecSocks = m_sessionMgr.getSockIDs();
+    for( auto sockID : vecSocks )
     {
-        if( curTime - it->second.m_lastHeartbeatTime >=  std::chrono::seconds( m_heartbeatDisconnectInterval) )
+        uint64_t roleID = 0;
+        bool bNeedToRemove = false;
+        auto optSession = m_sessionMgr.getSessionInfo( sockID );
+        if( !optSession.has_value())
         {
-            SPDLOG_DEBUG("Disconnect detected by heartbeat:s_{},r_{}", it->first, it->second.m_roleID);
-            it = m_sessionMgr.m_mapSessions.erase( it );
-            int64_t roleID = m_sessionMgr.getRoleIDFromSockID( it->first );
-            m_sessionMgr.m_mapRoleToSocks.erase( roleID );
+            SPDLOG_DEBUG("Disconnect detected by heartbeat, Invalid sock?:s_{}", sockID);
+            bNeedToRemove = true;
+        }
+        else {
+            SessionInfo& sessInfo = optSession.value();
+            roleID = sessInfo.m_roleID;
+            if( curTime - sessInfo.m_lastHeartbeatTime >= std::chrono::seconds( m_heartbeatDisconnectInterval ) )
+            {
+                SPDLOG_DEBUG("Disconnect detected by heartbeat:s_{},r_{}", sockID, roleID);
+                bNeedToRemove = true;
+            }
+            else{
+                bNeedToRemove = false;
+            }
+            
+        }
+        
+        if( bNeedToRemove )
+        {
+            m_sessionMgr.removeSession( sockID );
+            
             if( roleID != 0 )
             {
                 m_playerMgr.removePlayer( roleID );
             }
-            INetworkMgr::getInstance()->closeSock( it->first );
+            
+            INetworkMgr::getInstance()->closeSock( sockID );
         }
-        else{
-            ++it;
-        }
+        
     }
 }
 void GameLoop::dealAddRole( int sockID, const DBResponse& rsp )
@@ -378,7 +397,7 @@ void GameLoop::dealAddRole( int sockID, const DBResponse& rsp )
     
     m_playerMgr.addPlayer( sockID,  query.name() ,  query.roleid(),  query.level() );
     
-    m_sessionMgr.addSessionInfo( sockID,  query.roleid() );
+    m_sessionMgr.addSessionInfo( sockID,  query.roleid(), m_timeService.getCurTime());
     
     ResponseLogin rspLogin;
     rspLogin.mutable_roleinfo()->set_roleid( query.roleid() );
@@ -412,7 +431,7 @@ void GameLoop::dealQueryRole( int sockID, const DBResponse& rsp  )
     }
     
     m_playerMgr.addPlayer( sockID,  query.name() ,  query.roleid(),  query.level() );
-    m_sessionMgr.addSessionInfo( sockID,  query.roleid() );
+    m_sessionMgr.addSessionInfo( sockID,  query.roleid(), m_timeService.getCurTime() );
     
     ResponseLogin rspLogin;
     rspLogin.mutable_roleinfo()->set_roleid( query.roleid() );
@@ -539,7 +558,7 @@ void GameLoop::dealHeartBeat( int sockID, const Msg& msg )
         return;
     }
     
-    m_sessionMgr.refreshHeartbeat( sockID );
+    m_sessionMgr.refreshHeartbeat( sockID,  m_timeService.getCurTime() );
     
     SPDLOG_TRACE("Receive HeartBeat roleid:{}, sock:{}", heartbeat.roleid(), sockID );
 }

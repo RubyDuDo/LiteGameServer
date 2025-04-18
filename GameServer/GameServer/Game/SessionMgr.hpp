@@ -26,21 +26,19 @@ public:
 class SessionMgr
 {
 public:
-    void setTimeService( ITimeService* pTimeService );
-    
     int getSockIDFromRoleID( uint64_t roleID );
     uint64_t getRoleIDFromSockID( int sockID );
     
-    void addSessionInfo( int sockID, uint64_t roleID );
+    void addSessionInfo( int sockID, uint64_t roleID, TimePoint curTime );
     void removeSession( int sockID );
     
-    void refreshHeartbeat( int sockID );
+    void refreshHeartbeat( int sockID,TimePoint curTime );
     
     bool isMatchSockAndRole( int sockID, uint64_t roleID );
+    
+    std::vector<int> getSockIDs();
+    std::optional<SessionInfo> getSessionInfo( int sockID );
 
-private:
-    TimePoint getCurTime();
-    ITimeService* m_pTimeService;
 public:
     std::map<int, SessionInfo>  m_mapSessions;
     std::map<uint64_t, int>  m_mapRoleToSocks;

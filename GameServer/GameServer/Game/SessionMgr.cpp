@@ -14,10 +14,6 @@ SessionInfo::SessionInfo( int sockID, uint64_t roleID, TimePoint curTime ):m_soc
     
 }
 
-void SessionMgr::setTimeService( ITimeService* pTimeService )
-{
-    m_pTimeService = pTimeService;
-}
 
 //void SessionMgr::setTimeService( ITimeService* pTimeService );
 int SessionMgr::getSockIDFromRoleID( uint64_t roleID )
@@ -46,7 +42,7 @@ uint64_t SessionMgr::getRoleIDFromSockID( int sockID )
     
 }
 
-void SessionMgr::addSessionInfo( int sockID, uint64_t roleID )
+void SessionMgr::addSessionInfo( int sockID, uint64_t roleID, TimePoint curTime  )
 {
     SPDLOG_DEBUG("s_{},r_{}", sockID, roleID);
     if( sockID <= 0 || roleID <= 0  )
@@ -76,7 +72,7 @@ void SessionMgr::addSessionInfo( int sockID, uint64_t roleID )
         m_mapSessions.erase( sockID );
     }
     
-    m_mapSessions.insert( std::make_pair( sockID, SessionInfo( sockID,  roleID ,  m_pTimeService->getCurTime() )) );
+    m_mapSessions.insert( std::make_pair( sockID, SessionInfo( sockID,  roleID ,  curTime )) );
     
 }
 
@@ -108,23 +104,36 @@ void SessionMgr::removeSession( int sockID )
     
 }
 
-TimePoint SessionMgr::getCurTime()
-{
-    if( m_pTimeService){
-        return m_pTimeService->getCurTime();
-    }
-    else{
-        return std::chrono::steady_clock::now();
-    }
-    
-}
-
-void SessionMgr::refreshHeartbeat( int sockID )
+void SessionMgr::refreshHeartbeat( int sockID, TimePoint curTime)
 {
     auto it = m_mapSessions.find( sockID );
     if( it != m_mapSessions.end() )
     {
-        it->second.m_lastHeartbeatTime = m_pTimeService->getCurTime();
+        it->second.m_lastHeartbeatTime = curTime;
     }
     
+}
+
+std::vector<int> SessionMgr::getSockIDs()
+{
+    std::vector<int> vecSocks;
+    for( const auto& [sock, info] : m_mapSessions )
+    {
+        vecSocks.push_back( sock );
+    }
+    
+    return vecSocks;
+    
+}
+
+std::optional<SessionInfo> SessionMgr::getSessionInfo( int sockID )
+{
+    auto it = m_mapSessions.find( sockID );
+    if( it != m_mapSessions.end() )
+    {
+        return it->second;
+    }
+    else{
+        return std::nullopt;;
+    }
 }
