@@ -114,16 +114,10 @@ source_group("proto" FILES
     proto/dbmsg.proto)
 
 
-
-
-get_target_property(TARGET_SOURCES GameServer SOURCES)
-message(STATUS "Sources for GameServer: ${TARGET_SOURCES}")
-
-
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")  # macOS
-    target_compile_definitions(GameServer
-    PRIVATE
-    -D__MACOS__
+    target_compile_definitions(GameServerLib
+        PUBLIC
+        __MACOS__
     )
 
     list( APPEND SOURCE_Network
@@ -131,9 +125,9 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")  # macOS
         Network/NetworkMgrKQueue.hpp
     )
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    target_compile_definitions(GameServer
-        PRIVATE
-        -D__LINUX__
+    target_compile_definitions(GameServerLib
+        PUBLIC
+        __LINUX__
     )
 
     list( APPEND SOURCE_Network
@@ -166,6 +160,9 @@ target_sources( GameServer
     PRIVATE
     main.cpp
 )
+
+get_target_property(TARGET_SOURCES GameServer SOURCES)
+message(STATUS "Sources for GameServer: ${TARGET_SOURCES}")
 
 # add dependencies
 include(FetchContent)
