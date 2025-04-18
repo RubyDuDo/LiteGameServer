@@ -20,8 +20,8 @@ public:
     void sendMsg( const std::string& strData );
     std::shared_ptr<std::string> getNextRecvMsg();
 public:
-    Buffer m_recvBuff;
-    Buffer m_sendBuff;
+    RingBuffer m_recvBuff;
+    RingBuffer m_sendBuff;
 };
 
 

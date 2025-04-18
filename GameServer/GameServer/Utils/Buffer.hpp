@@ -9,28 +9,27 @@
 #define Buffer_hpp
 
 #include <stdio.h>
+#include <vector>
 
-class Buffer
+class RingBuffer
 {
 public:
-    Buffer( int size = 2048);
+    RingBuffer( int size = 2048);
     
-    bool addData( char* pData, int len  );
+    bool addData( const char* pData, int len  );
     int getData( char* pBuff, int maxLen);
     void consumeData( int len );
     
+    int getCapacity() const;
     int getSize()const;
-    int getAvailableSize() const;
+    int getFreeSpaceSize() const;
     bool isEmpty() const;
-private:
-    void moveToStart();
-private:
-    int m_maxSize;
-    char* m_pBuff;
     
-    int m_head;
-    int m_tail;
-    
+private:
+    int m_capacity;             // Total capacity of the buffer
+    std::vector<char> m_buffer; // Underlying data storage
+    int m_readPos;             // Read position index
+    int m_writePos;            // Write position index
 };
 
 #endif /* Buffer_hpp */
