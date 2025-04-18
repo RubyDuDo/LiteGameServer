@@ -3,6 +3,8 @@ project(RubyGameServer)
 
 set(CMAKE_CXX_STANDARD 20)
 
+enable_testing()
+
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 message(STATUS "CMake generator: ${CMAKE_GENERATOR}")
 
@@ -10,15 +12,12 @@ message(STATUS " platform: ${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE
 
 
 add_executable(GameServer)
+add_library( GameServerLib STATIC )
 
 
-
-
-target_sources(GameServer
-    PRIVATE
+set( SOURCE_Game 
     GameLoop.cpp
     GameLoop.hpp
-    main.cpp
     GameNetHelper.cpp 
     GameNetHelper.hpp
     DBQueryHandler.cpp 
@@ -28,26 +27,14 @@ target_sources(GameServer
     Game/Event.cpp 
     Game/Event.hpp
     Game/SessionMgr.cpp 
-    Game/SessionMgr.hpp
-)
+    Game/SessionMgr.hpp)
+
 source_group("Game" FILES
-    GameLoop.cpp
-    GameLoop.hpp
+    ${SOURCE_Game}
     main.cpp
-    GameNetHelper.cpp 
-    GameNetHelper.hpp
-    DBQueryHandler.cpp 
-    DBQueryHandler.hpp
-    EventLogs.cpp 
-    EventLogs.hpp
-    Game/Event.cpp 
-    Game/Event.hpp
-    Game/SessionMgr.cpp 
-    Game/SessionMgr.hpp
 )
 
-target_sources(GameServer
-    PRIVATE
+set( SOURCE_DataMgr
     Game/DataMgr/DataDefine.cpp 
     Game/DataMgr/DataDefine.hpp
     Game/DataMgr/DataMgr.cpp
@@ -55,14 +42,10 @@ target_sources(GameServer
 )
 
 source_group( "Game\\DataMgr" FILES
-    Game/DataMgr/DataDefine.cpp 
-    Game/DataMgr/DataDefine.hpp
-    Game/DataMgr/DataMgr.cpp
-    Game/DataMgr/DataMgr.hpp
+    ${SOURCE_DataMgr}
 )
 
-target_sources(GameServer
-    PRIVATE
+set( SOURCE_Utils
     Utils/Buffer.hpp
     Utils/Buffer.cpp
     Utils/MsgQueue.cpp 
@@ -77,21 +60,10 @@ target_sources(GameServer
 )
 
 source_group("Utils" FILES
-    Utils/Buffer.hpp
-    Utils/Buffer.cpp
-    Utils/MsgQueue.cpp 
-    Utils/MsgQueue.hpp 
-    Utils/LoggerHelper.cpp 
-    Utils/LoggerHelper.hpp
-    Utils/json.hpp
-    Utils/IDGenerator.cpp 
-    Utils/IDGenerator.hpp
-    Utils/TimeService.cpp 
-    Utils/TimeService.hpp
+    ${SOURCE_Utils}
 )
 
-target_sources(GameServer
-    PRIVATE
+set( SOURCE_Network
     Network/TcpSocket.hpp
     Network/TcpSocket.cpp
     Network/INetworkMgr.cpp 
@@ -102,60 +74,46 @@ target_sources(GameServer
     # Network/NetworkMgrSelect.hpp 
 )
 
-source_group("Network" FILES
-    Network/TcpSocket.hpp
-    Network/TcpSocket.cpp
-    Network/INetworkMgr.cpp 
-    Network/INetworkMgr.hpp 
-    Network/NetSlot.cpp 
-    Network/NetSlot.hpp 
-    # Network/NetworkMgrSelect.cpp 
-    # Network/NetworkMgrSelect.hpp 
-)
-
-target_sources(GameServer
-    PRIVATE
+set( SOURCE_DataReader
     DataReader/INIReader.cpp 
     DataReader/INIReader.hpp)
 
 source_group("DataReader" FILES
-    DataReader/INIReader.cpp
-    DataReader/INIReader.hpp)
+    ${SOURCE_DataReader}
+)
 
-target_sources(GameServer
-    PRIVATE
+set( SOURCE_DB
     DB/DBMgr.cpp 
-    DB/DBMgr.hpp)
+    DB/DBMgr.hpp
+)
 
 source_group("DB" FILES
-    DB/DBMgr.cpp
-    DB/DBMgr.hpp)
+    ${SOURCE_DB}
+)
 
-target_sources(GameServer
-    PRIVATE
+set( SOURCE_Player
     Player/Player.cpp 
     Player/Player.hpp
     Player/PlayerMgr.cpp 
-    Player/PlayerMgr.hpp)
+    Player/PlayerMgr.hpp
+)
 
 source_group("Player" FILES
-    Player/Player.cpp
-    Player/Player.hpp
-    Player/PlayerMgr.cpp
-    Player/PlayerMgr.hpp)
+    ${SOURCE_Player}
+)
 
-target_sources(GameServer
-    PRIVATE
+set( SOURCE_proto
     proto/msg.pb.cc  
     proto/msg.pb.h 
     proto/dbmsg.pb.cc  
     proto/dbmsg.pb.h )
 
 source_group("proto" FILES
-    proto/msg.pb.cc
-    proto/msg.pb.h
-    proto/dbmsg.pb.cc
-    proto/dbmsg.pb.h)
+    ${SOURCE_proto}
+    proto/msg.proto 
+    proto/dbmsg.proto)
+
+
 
 
 get_target_property(TARGET_SOURCES GameServer SOURCES)
@@ -168,14 +126,9 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")  # macOS
     -D__MACOS__
     )
 
-    target_sources(GameServer
-    PRIVATE
-    Network/NetworkMgrKQueue.cpp 
-    Network/NetworkMgrKQueue.hpp)
-
-    source_group("Network" FILES
-    Network/NetworkMgrKQueue.cpp
-    Network/NetworkMgrKQueue.hpp
+    list( APPEND SOURCE_Network
+        Network/NetworkMgrKQueue.cpp 
+        Network/NetworkMgrKQueue.hpp
     )
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     target_compile_definitions(GameServer
@@ -183,18 +136,36 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
         -D__LINUX__
     )
 
-    target_sources(GameServer
-        PRIVATE
-        Network/NetworkMgrEpoll.cpp 
-        Network/NetworkMgrEpoll.hpp)
-
-    source_group("Network" FILES
+    list( APPEND SOURCE_Network
         Network/NetworkMgrEpoll.cpp
         Network/NetworkMgrEpoll.hpp
     )
+
+
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
+
+
+set( GAMESERVER_SOURCE 
+    ${SOURCE_Game}
+    ${SOURCE_DataMgr}
+    ${SOURCE_Utils}
+    ${SOURCE_Network}
+    ${SOURCE_DataReader}
+    ${SOURCE_DB}
+    ${SOURCE_Player}
+    ${SOURCE_proto}    
+)
+
+source_group("Network" FILES
+    ${SOURCE_Network}
+)
+
+target_sources( GameServer 
+    PRIVATE
+    main.cpp
+)
 
 # add dependencies
 include(FetchContent)
@@ -206,21 +177,45 @@ include(SetupSqdlog)
 include(SetupMysqlCpp)
 # add dependencies end
 
-target_include_directories(GameServer
-    PRIVATE
+set(GAME_SERVER_INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/proto
     ${CMAKE_CURRENT_SOURCE_DIR}/DataReader
     ${CMAKE_CURRENT_SOURCE_DIR}/DB
-    ${CMAKE_CURRENT_SOURCE_DIR}/Player)
-
-
-
+    ${CMAKE_CURRENT_SOURCE_DIR}/Player
+)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set_target_properties(GameServer PROPERTIES
     BUILD_WITH_INSTALL_RPATH TRUE
     INSTALL_RPATH "$ORIGIN")
 endif()
+
+
+# ================= test config ============================
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip 
+  # or use Git Repository:
+  # GIT_REPOSITORY https://github.com/google/googletest.git
+  # GIT_TAG        release-1.14.0 
+)
+
+FetchContent_MakeAvailable(googletest)
+
+target_sources( GameServerLib
+    PRIVATE
+    ${GAMESERVER_SOURCE})
+
+target_include_directories(GameServerLib
+    PUBLIC
+    ${GAME_SERVER_INCLUDE_DIRS}
+)
+
+
+target_link_libraries( GameServer PRIVATE GameServerLib)
+
+add_subdirectory(tests)
 
 
 

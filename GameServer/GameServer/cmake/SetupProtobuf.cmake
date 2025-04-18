@@ -20,12 +20,12 @@ FetchContent_Declare(
 FetchContent_GetProperties(protobuf)
 
 # 添加 protobuf 的 src 目录到你的项目 include 路径，解决 port_def.inc 找不到的问题
-target_include_directories(GameServer PRIVATE
+target_include_directories(GameServerLib PUBLIC
   ${protobuf_SOURCE_DIR}/../src
 )
 
 target_link_libraries(GameServer
-  PRIVATE
+  PUBLIC
   protobuf::libprotobuf  # 使用 FetchContent 的现代 CMake 方式
 )
 

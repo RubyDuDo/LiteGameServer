@@ -7,7 +7,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")  # macOS
     set(MYSQL_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../thirdlibs/${platform}/mysql-connector-c++)
 
     target_link_libraries(GameServer
-        PRIVATE
+        PUBLIC
         ${MYSQL_ROOT}/lib64/libssl.dylib
         ${MYSQL_ROOT}/lib64/libcrypto.dylib
         ${MYSQL_ROOT}/lib64/libmysqlcppconn-static.a
@@ -25,15 +25,15 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set(MYSQL_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../thirdlibs/${platform}/mysql-connector-c++)
         
     target_link_libraries(GameServer
-        PRIVATE
+        PUBLIC
         ${MYSQL_ROOT}/lib64/libmysqlcppconn.so.9.8.2.0
     )
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}")
 endif()
 
-target_include_directories(GameServer
-    PRIVATE
+target_include_directories(GameServerLib
+    PUBLIC
     ${MYSQL_ROOT}/include
 )
 
