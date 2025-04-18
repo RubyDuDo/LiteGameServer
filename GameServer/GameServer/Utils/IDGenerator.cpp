@@ -20,6 +20,9 @@ bool IDGenerator::init( int serverID, int64_t epochTimestamp )
         return false;
     }
     
+    m_serverID = serverID;
+    m_epochTimestamp = epochTimestamp;
+    
     return true;
 }
 

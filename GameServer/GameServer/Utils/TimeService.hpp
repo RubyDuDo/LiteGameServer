@@ -17,6 +17,9 @@ class ITimeService
 {
 public:
     virtual void update() = 0 ;
+    
+    //offer a way to control the time, use this or update()
+    virtual void update( TimePoint curTime ) = 0;
     virtual TimePoint getCurTime() = 0 ;
     virtual TimeDuration getDeltaMS() = 0 ;
     
@@ -28,6 +31,7 @@ class CTimeService : public ITimeService
 public:
     CTimeService();
     virtual void update() override;
+    virtual void update( TimePoint curTime ) override;
     virtual TimePoint getCurTime() override;
     virtual TimeDuration getDeltaMS() override;
 private:
