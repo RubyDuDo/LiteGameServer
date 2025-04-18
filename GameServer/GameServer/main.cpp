@@ -10,13 +10,13 @@
 #include <limits.h>   // for PATH_MAX
 #include "GameLoop.hpp"
 
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/basic_file_sink.h>
+#include "Utils/LoggerHelper.hpp"
 
 #include <csignal>
 
 GameLoop* m_pGame = nullptr;
+
+//workdir set: $(PROJECT_DIR)/../bin
 
 void initLog()
 {
