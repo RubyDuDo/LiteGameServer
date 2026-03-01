@@ -55,12 +55,12 @@ void DBQueryHandler::queryAccount( int queryID , const DBRequest& req )
     
     try {
         
-        std::unique_ptr<sql::Statement> stmt( getSqlConn()->createStatement());
-        
-        string strQuery = std::format("select * from accounts where account = '{}' ", query.account() );
-        cout<<strQuery<<endl;
+        std::unique_ptr<sql::PreparedStatement> stmt(
+            getSqlConn()->prepareStatement("SELECT * FROM accounts WHERE account = ?")
+        );
+        stmt->setString(1, query.account());
     
-        std::unique_ptr<sql::ResultSet> res( stmt->executeQuery(strQuery));
+        std::unique_ptr<sql::ResultSet> res( stmt->executeQuery());
         
         if( res->next() )
         {
@@ -99,12 +99,13 @@ void DBQueryHandler::queryRole( int queryID, const DBRequest& req )
     }
     
     try {
-        std::unique_ptr<sql::Statement> stmt( getSqlConn()->createStatement());
-        
-        string strQuery = std::format("select * from roles where roleid = {}", query.roleid() );
-        SPDLOG_DEBUG("Insert role: {}", strQuery);
+        std::unique_ptr<sql::PreparedStatement> stmt(
+            getSqlConn()->prepareStatement("SELECT * FROM roles WHERE roleid = ?")
+        );
+        stmt->setUInt64(1, query.roleid());
+        SPDLOG_DEBUG("QueryRole roleid: {}", query.roleid());
     
-        std::unique_ptr<sql::ResultSet> res( stmt->executeQuery(strQuery));
+        std::unique_ptr<sql::ResultSet> res( stmt->executeQuery());
         
         if( res->next() )
         {
@@ -153,24 +154,30 @@ void DBQueryHandler::addRole( int queryID, const DBRequest& req)
         try {
 
             //step 1： insert a new role
-            string strQuery = std::format("insert into roles (roleid, name) values ('{}','{}') ", query.roleid(), query.name() );
-            SPDLOG_DEBUG("Insert role: {}", strQuery);
-            cout<<strQuery<<endl;
+            SPDLOG_DEBUG("Insert role: roleid={}, name={}", query.roleid(), query.name());
             
-            std::unique_ptr<sql::Statement> stmt( getSqlConn()->createStatement());
+            std::unique_ptr<sql::PreparedStatement> stmtInsert(
+                getSqlConn()->prepareStatement("INSERT INTO roles (roleid, name) VALUES (?, ?)")
+            );
+            stmtInsert->setUInt64(1, query.roleid());
+            stmtInsert->setString(2, query.name());
             
-            int rowAffected =  stmt->executeUpdate(strQuery);
+            int rowAffected = stmtInsert->executeUpdate();
             if( rowAffected == 0 )
             {
-                cerr<<"Insert role fail"<<endl;
+                SPDLOG_ERROR("Insert role fail");
                 return DBErr_Fail;
             }
 
             
             //step 3: modify the account table
-            strQuery = std::format("update accounts set roleid = {} where account = '{}'", query.roleid(), query.name() );
-            SPDLOG_DEBUG("Insert role: {}", strQuery);
-            rowAffected =  stmt->executeUpdate( strQuery );
+            std::unique_ptr<sql::PreparedStatement> stmtUpdate(
+                getSqlConn()->prepareStatement("UPDATE accounts SET roleid = ? WHERE account = ?")
+            );
+            stmtUpdate->setUInt64(1, query.roleid());
+            stmtUpdate->setString(2, query.name());
+            SPDLOG_DEBUG("Update account roleid={}, name={}", query.roleid(), query.name());
+            rowAffected = stmtUpdate->executeUpdate();
             if( rowAffected == 0 )
             {
                 SPDLOG_ERROR("Update account fail!");
@@ -178,9 +185,12 @@ void DBQueryHandler::addRole( int queryID, const DBRequest& req)
             }
             
             //step 4: get the whole roleinfo from db
-            strQuery = std::format("select * from roles where roleid = {}", roleID );
-            SPDLOG_DEBUG( strQuery);
-            std::unique_ptr<sql::ResultSet> resQuery( stmt->executeQuery(strQuery));
+            std::unique_ptr<sql::PreparedStatement> stmtSelect(
+                getSqlConn()->prepareStatement("SELECT * FROM roles WHERE roleid = ?")
+            );
+            stmtSelect->setUInt64(1, roleID);
+            SPDLOG_DEBUG("Query role by roleID={}", roleID);
+            std::unique_ptr<sql::ResultSet> resQuery( stmtSelect->executeQuery());
             
             if( resQuery->next() )
             {
