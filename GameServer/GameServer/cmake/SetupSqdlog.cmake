@@ -19,7 +19,7 @@ target_link_libraries(GameServerLib PUBLIC spdlog::spdlog)
 
 
 # using this method to control the log level at compile time could achieve better performance.
-target_compile_definitions(GameServer PRIVATE
+target_compile_definitions(GameServerLib PRIVATE
     # for debug， SPDLOG_ACTIVE_LEVEL 为 TRACE
     $<$<CONFIG:Debug>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE>
 

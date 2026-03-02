@@ -24,7 +24,7 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
     set(MYSQL_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../thirdlibs/${platform}/mysql-connector-c++)
         
-    target_link_libraries(GameServer
+    target_link_libraries(GameServerLib
         PUBLIC
         ${MYSQL_ROOT}/lib64/libmysqlcppconn.so.9.8.2.0
     )
@@ -37,6 +37,6 @@ target_include_directories(GameServerLib
     ${MYSQL_ROOT}/include
 )
 
-target_link_libraries(GameServer
+target_link_libraries(GameServerLib
     PRIVATE
     resolv)

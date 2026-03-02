@@ -8,7 +8,7 @@
 #include "Buffer.hpp"
 #include <cstring>
 #include <algorithm>
-
+#include <stdexcept>
 
 RingBuffer::RingBuffer( int size ):
 m_capacity(size),

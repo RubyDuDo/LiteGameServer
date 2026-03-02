@@ -36,7 +36,7 @@ private:
     virtual void notifyThread() override ;
     virtual void innerRemoveSock( int fd ) override;
 
-    void handleCloseSocks();
+    // void handleCloseSocks();
     
     
     

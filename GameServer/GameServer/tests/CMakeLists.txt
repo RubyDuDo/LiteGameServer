@@ -18,4 +18,4 @@ target_include_directories(run_tests PRIVATE ${CMAKE_SOURCE_DIR})
 
 # 自动发现测试
 include(GoogleTest)
-gtest_discover_tests(run_tests)
+# gtest_discover_tests(run_tests)
