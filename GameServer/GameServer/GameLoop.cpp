@@ -115,6 +115,7 @@ void GameLoop::stop()
 
 void GameLoop::reloadConfigure()
 {
+    SPDLOG_INFO("TODO:reloadConfigure!");
     //todo , reload configure
 }
 

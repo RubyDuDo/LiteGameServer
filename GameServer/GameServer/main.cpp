@@ -79,6 +79,11 @@ int main(int argc, const char * argv[]) {
         SPDLOG_ERROR("sigaction SIGINT failed");
         return 1;
     }
+    
+    if (sigaction(SIGHUP, &action, NULL) == -1) {
+        SPDLOG_ERROR("sigaction SIGHUP failed");
+        return 1;
+    }
 
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
