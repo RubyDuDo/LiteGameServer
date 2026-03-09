@@ -73,6 +73,7 @@ void SessionMgr::addSessionInfo( int sockID, uint64_t roleID, TimePoint curTime 
     }
     
     m_mapSessions.insert( std::make_pair( sockID, SessionInfo( sockID,  roleID ,  curTime )) );
+    m_mapRoleToSocks.insert( std::make_pair( roleID, sockID ) );
     
 }
 
@@ -87,6 +88,7 @@ bool SessionMgr::isMatchSockAndRole( int sockID, uint64_t roleID )
         return true;
     }
     else{
+        SPDLOG_ERROR("Mismatch preSockID preRoleID:{},{}", preSockID, preRoleID );
         return false;
     }
 }

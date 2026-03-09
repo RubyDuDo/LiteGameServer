@@ -480,7 +480,7 @@ void GameLoop::dealLogin( int sockID, const Msg& msg )
         return;
     }
     
-    SPDLOG_INFO("Receive Login {} _ {}", login.strname(), login.strpass());
+    SPDLOG_INFO("Receive Login {} _ {} _from:{}", login.strname(), login.strpass(), sockID);
     
     auto req = std::make_unique<DBRequest>();
     req->mutable_head()->set_type( DBReqType_QueryAccount );
