@@ -99,15 +99,22 @@ void NetworkMgrEpoll::innerRun()
                     /* code */
                     auto newSock = m_listenSock->Accept();
                     if (!newSock) {
-                        SPDLOG_ERROR("Accept Error");
-                        break;
+                        // Accept returns nullptr on error or no more connections
+                        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                            SPDLOG_TRACE("No more pending connections to accept.");
+                        } else {
+                            // Log unexpected accept error
+                            SPDLOG_ERROR("Accept() error on listen socket: {}", strerror(errno));
+                        }
+                        break; // Exit accept loop
+                    }
+                    else{
+                        SPDLOG_DEBUG("Accepted new connection: fd={}", newSock->m_sock);
+                        onConnect( newSock );
                     }
                 
-                    onConnect( newSock );
+                    
                 }
-                
-
-                
 
             } else if (fd == m_eventFd) {
                 // Handle eventfd notification
