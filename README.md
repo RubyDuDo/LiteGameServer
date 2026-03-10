@@ -16,6 +16,9 @@ If you're interested in **which features are already implemented** and **what’
 If you want to learn more about the **system design** or the **issues encountered during development**, check out:  
 📄 [`GameServer/doc/system_design.md`](GameServer/doc/system_design.md)
 
+## Tech Stack
+
+Built with C++20 on Linux/macOS, using CMake for cross-platform builds. The server uses a multithreaded architecture with separated network, logic, and database threads, communicating through thread-safe message queues. The networking layer is based on epoll (LT mode), with Protobuf for message serialization and MySQL for data persistence. Features include Snowflake ID generation, heartbeat detection, event logging, config management, and graceful shutdown via signal handling.
 
 ## build
 This project is managed using **CMake**.  
