@@ -61,7 +61,6 @@ void DBQueryHandler::queryAccount( int queryID , const DBRequest& req )
         stmt->setString(1, query.account());
     
         std::unique_ptr<sql::ResultSet> res( stmt->executeQuery());
-        
         if( res->next() )
         {
             std::string name = res->getString( "account" );
@@ -77,7 +76,22 @@ void DBQueryHandler::queryAccount( int queryID , const DBRequest& req )
             onRsp( queryID, req.head().type(), DBErr_OK, rspQuery );
         }
         else{
-            onRsp( queryID, req.head().type(), DBErr_NotExist );
+            //if the account doesn't exist, just create one with password "111"
+            std::string name = query.account();
+            std::string passwd = "111";
+            auto err =  DBQueryHandler::addAccount( name, passwd );
+            if( err == DBErr_OK )
+            {
+                DBRspAccout rspQuery;
+                rspQuery.set_account( name );
+                rspQuery.set_passwd( passwd );
+                rspQuery.set_roleid( 0 );
+
+                onRsp( queryID, req.head().type(), DBErr_OK, rspQuery );
+            }
+            else{
+                onRsp( queryID, req.head().type(), DBErr_NotExist );
+            }   
         }
         
         
@@ -86,6 +100,26 @@ void DBQueryHandler::queryAccount( int queryID , const DBRequest& req )
         return ;
     }
 }
+
+DBErrorType DBQueryHandler::addAccount( string& accountID , string& passwd)
+{
+    std::unique_ptr<sql::PreparedStatement> stmtInsert(
+        getSqlConn()->prepareStatement("INSERT INTO accounts (account, passwd, roleid) VALUES (?, ?, ?)")
+    );
+    stmtInsert->setString(1, accountID );
+    stmtInsert->setString(2, passwd);
+    stmtInsert->setUInt64(3, 0 );
+    
+    int rowAffected = stmtInsert->executeUpdate();
+    if( rowAffected == 0 )
+    {
+        SPDLOG_ERROR("Insert account fail");
+        return DBErr_Fail;
+    }
+
+    return DBErr_OK;
+}
+
 
 void DBQueryHandler::queryRole( int queryID, const DBRequest& req )
 {
@@ -132,8 +166,6 @@ void DBQueryHandler::queryRole( int queryID, const DBRequest& req )
     }
     
 }
-
-
 
 void DBQueryHandler::addRole( int queryID, const DBRequest& req)
 {

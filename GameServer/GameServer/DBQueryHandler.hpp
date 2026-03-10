@@ -23,6 +23,7 @@ private:
     void queryAccount( int queryID,  const DBRequest& req );
     void addRole( int queryID, const DBRequest& req);
     void queryRole( int queryID, const DBRequest& req );
+    DBErrorType addAccount( string& accountID , string& passwd);
 };
 
 #endif /* DBQueryHandler_hpp */
